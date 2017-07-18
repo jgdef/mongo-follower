@@ -14,7 +14,9 @@
  */
 package com.traackr.mongo.tailer.service;
 
-import com.traackr.mongo.tailer.params.OpLogTailerParams;
+import com.traackr.mongo.tailer.model.OpLogTailerParams;
+import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.Record;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;

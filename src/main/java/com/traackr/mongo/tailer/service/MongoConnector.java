@@ -1,5 +1,5 @@
 /**
- * Record.java - Traackr, Inc.
+ * MongoConnector.java - Traackr, Inc.
  *
  * This document set is the property of Traackr, Inc., a Massachusetts
  * Corporation, and contains confidential and trade secret information. It
@@ -12,26 +12,22 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
-
 package com.traackr.mongo.tailer.service;
 
-import org.bson.Document;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 /**
  * @author wwinder
- *         Created on: 12/14/16
+ *         Created on: 5/25/16
  */
-public class Record {
-  public final OplogLine oplogLine;
-  public final Document importLine;
-
-  public Record(OplogLine line) {
-    oplogLine = line;
-    importLine = null;
+public class MongoConnector {
+  private final String uri;
+  public MongoConnector(String uri) {
+    this.uri = uri;
   }
 
-  public Record(Document line) {
-    oplogLine = null;
-    importLine = line;
+  public MongoClient getClient() throws Exception {
+    return new MongoClient(new MongoClientURI(uri));
   }
 }

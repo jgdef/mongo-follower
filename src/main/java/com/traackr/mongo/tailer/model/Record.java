@@ -1,5 +1,5 @@
 /**
- * OpLogTailerParams.java - Traackr, Inc.
+ * Record.java - Traackr, Inc.
  *
  * This document set is the property of Traackr, Inc., a Massachusetts
  * Corporation, and contains confidential and trade secret information. It
@@ -12,26 +12,26 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
-package com.traackr.mongo.tailer.params;
 
-import com.traackr.mongo.tailer.connection.MongoConnector;
-import com.traackr.mongo.tailer.service.Record;
+package com.traackr.mongo.tailer.model;
 
-import java.util.concurrent.BlockingQueue;
-
-import lombok.Value;
+import org.bson.Document;
 
 /**
  * @author wwinder
- *         Created on: 5/29/16
+ *         Created on: 12/14/16
  */
-@Value(staticConstructor="with")
-public class OpLogTailerParams {
-  public GlobalParams globals;
-  public boolean doImport;
-  public BlockingQueue<Record> queue;
-  public MongoConnector connector;
-  public String database;
-  public String collection;
-}
+public class Record {
+  public final OplogLine oplogLine;
+  public final Document importLine;
 
+  public Record(OplogLine line) {
+    oplogLine = line;
+    importLine = null;
+  }
+
+  public Record(Document line) {
+    oplogLine = null;
+    importLine = line;
+  }
+}

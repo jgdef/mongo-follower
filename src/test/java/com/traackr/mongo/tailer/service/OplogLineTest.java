@@ -2,6 +2,8 @@ package com.traackr.mongo.tailer.service;
 
 import static org.junit.Assert.assertEquals;
 
+import com.traackr.mongo.tailer.model.OplogLine;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

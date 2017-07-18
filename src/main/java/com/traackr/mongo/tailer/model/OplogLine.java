@@ -12,7 +12,7 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
-package com.traackr.mongo.tailer.service;
+package com.traackr.mongo.tailer.model;
 
 import java.util.Arrays;
 

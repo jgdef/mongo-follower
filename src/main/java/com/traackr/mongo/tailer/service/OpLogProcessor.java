@@ -14,8 +14,10 @@
  */
 package com.traackr.mongo.tailer.service;
 
-import com.traackr.mongo.tailer.interfaces.IMongoEventListener;
-import com.traackr.mongo.tailer.params.GlobalParams;
+import com.traackr.mongo.tailer.interfaces.MongoEventListener;
+import com.traackr.mongo.tailer.model.GlobalParams;
+import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.Record;
 
 import org.bson.types.BSONTimestamp;
 import org.slf4j.Logger;
@@ -42,13 +44,13 @@ public class OpLogProcessor implements Runnable {
 
   private final GlobalParams globals;
   private final BlockingQueue<Record> recordQueue;
-  private final IMongoEventListener oplogEventListener;
+  private final MongoEventListener oplogEventListener;
   private final List<OplogLine> updateQueue = new ArrayList<>();
   private long mark = System.currentTimeMillis();
 
   public OpLogProcessor(GlobalParams globals,
                         BlockingQueue<Record> recordQueue,
-                        IMongoEventListener oplogEventListener) {
+                        MongoEventListener oplogEventListener) {
     this.globals = globals;
     this.recordQueue = recordQueue;
     this.oplogEventListener = oplogEventListener;
