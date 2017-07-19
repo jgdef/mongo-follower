@@ -38,13 +38,11 @@ public interface MongoEventListener {
    * @param id
    * @param oplog
    */
-  // mongo-connector 'remove'
   public void delete(String id, OplogLine oplog);
 
   /**
    * @param wholesale this is an update being treated as an insert.
    */
-  // mongo-connector 'upsert'
   public void insert(boolean wholesale, Document doc, OplogLine oplog);
 
   /**
@@ -67,6 +65,5 @@ public interface MongoEventListener {
    */
   public void bulkUpdate(Collection<OplogLine> docs);
 
-  // mongo-connector 'handle_command' -- What is this? Our oplog has no 'c'
   public void command(Document doc, OplogLine oplog);
 }
