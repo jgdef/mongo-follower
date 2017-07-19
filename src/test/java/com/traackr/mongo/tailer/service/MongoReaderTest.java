@@ -51,7 +51,7 @@ public class MongoReaderTest {
 
     // Inject embedded mongo client.
     mc = Mockito.mock(MongoConnector.class);
-    Mockito.doReturn(em.mongo).when(mc).getClient();
+    Mockito.doReturn(em.getClient()).when(mc).getClient();
 
     globalParams = new GlobalParams(
         true,
@@ -81,7 +81,7 @@ public class MongoReaderTest {
    * Helper that creates some documents.
    */
   private void createDocuments(final int messageCount, final boolean withCleanup) {
-    MongoDatabase db = em.mongo.getDatabase(this.db);
+    MongoDatabase db = em.getClient().getDatabase(this.db);
     MongoCollection<Document> coll = db.getCollection(this.collection);
 
     Document doc = new Document("name", "MongoDB")
@@ -130,11 +130,11 @@ public class MongoReaderTest {
    * @throws Exception
    */
   @Test
-  public void testMongoDisconnect() throws Exception {
+  public void testMongoReaderReconnect() throws Exception {
     MongoConnector mockConnector = Mockito.mock(MongoConnector.class);
 
-    MongoClient one = mc.getClient();
-    MongoClient two = mc.getClient();
+    MongoClient one = em.getClient();
+    MongoClient two = em.getClient();
     Mockito.doReturn(one).doReturn(two)
         .when(mockConnector).getClient();
 

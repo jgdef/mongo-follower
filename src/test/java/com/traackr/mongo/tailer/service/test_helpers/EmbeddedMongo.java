@@ -48,51 +48,50 @@ import java.util.List;
  * Created on: 7/17/17
  */
 public class EmbeddedMongo {
-  private EmbeddedMongo() {
+  private final String host = "localhost";
+  private final int port;
+
+  private EmbeddedMongo() throws IOException {
+    port = Network.getFreeServerPort();
   }
 
   MongodExecutable mongodExecutable = null;
   public MongodProcess mongod;
-  public MongoClient mongo;
-  public MongoDatabase db;
-  public MongoCollection<Document> col;
 
-  // Simple example.
+  public MongoClient getClient() {
+    return new MongoClient(host, port);
+  }
+
+  /**
+   * Simple example to make sure the flapdoodle mongo wrapper works.
+   */
   public static EmbeddedMongo simpleStartMongo(Version.Main version) throws IOException {
     EmbeddedMongo em = new EmbeddedMongo();
 
     MongodStarter starter = MongodStarter.getDefaultInstance();
 
-    String bindIp = "localhost";
-    int port = 12345;
     IMongodConfig mongodConfig = new MongodConfigBuilder()
         .version(version)
-        .net(new Net(bindIp, port, Network.localhostIsIPv6()))
+        .net(new Net(em.host, em.port, Network.localhostIsIPv6()))
         .build();
 
     em.mongodExecutable = starter.prepare(mongodConfig);
     em.mongod = em.mongodExecutable.start();
 
-    em.mongo = new MongoClient(bindIp, port);
-    em.db = em.mongo.getDatabase("test");
-    em.db.createCollection("testCol", new CreateCollectionOptions());
-    em.col = em.db.getCollection("testCol");
-    em.col.insertOne(new Document("testDoc", new Date()));
-
     return em;
   }
 
+  /**
+   * Start mongo with oplog / replicaset enabled.
+   */
   public static EmbeddedMongo replicaSetStartMongo(Version.Main version) throws IOException {
-    final String host = "localhost";
-    final int port = Network.getFreeServerPort();
     final EmbeddedMongo em = new EmbeddedMongo();
 
-    em.mongod = startMongod(version, port);
+    em.mongod = startMongod(version, em.port);
 
-    final ServerAddress primaryAddr = new ServerAddress(host, port);
-    try (final MongoClient client = new MongoClient(primaryAddr)) {
+    try (final MongoClient client = em.getClient()) {
       final Document host0 = new Document("_id", 0)
-          .append("host", String.format("%s:%d", host, port));
+          .append("host", String.format("%s:%d", em.host, em.port));
       final List<Document> members = new ArrayList<>();
       members.add(host0);
       final Document replSetSettings = new Document("_id", "testRepSet")
@@ -102,21 +101,9 @@ public class EmbeddedMongo {
       adminDb.runCommand(new Document("replSetInitiate", replSetSettings));
     }
 
-    try (MongoClient mongoClient = new MongoClient(primaryAddr)) {
+    try (MongoClient mongoClient = em.getClient()) {
       System.out.println("DB Names: " + mongoClient.listDatabaseNames());
     }
-
-    // Initialize some client stuffs.
-    em.mongo = new MongoClient(primaryAddr);
-    em.db = em.mongo.getDatabase("testttt");
-
-    try {
-      Thread.sleep(5000);
-    } catch (Exception e) {
-    }
-    em.db.createCollection("testtttCol", new CreateCollectionOptions());
-    em.col = em.db.getCollection("testtttCol");
-    em.col.insertOne(new Document("testDoc", new Date()));
 
     return em;
   }
@@ -150,16 +137,9 @@ public class EmbeddedMongo {
 
 
   public void stopMongo() {
-    /*
-    if (mongosExecutable != null) {
-      mongosExecutable.stop();
-    }
-    mongosExecutable = null;
-
     if (mongodExecutable != null) {
       mongodExecutable.stop();
     }
     mongodExecutable = null;
-    */
   }
 }
