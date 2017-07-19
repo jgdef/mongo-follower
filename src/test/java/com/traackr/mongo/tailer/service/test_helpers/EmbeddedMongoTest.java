@@ -15,12 +15,11 @@
 
 package com.traackr.mongo.tailer.service.test_helpers;
 
-import static com.traackr.mongo.tailer.service.test_helpers.EmbeddedMongo.replicaSetStartMongo;
-
 import com.mongodb.BasicDBObject;
 
 import de.flapdoodle.embed.mongo.distribution.Version;
 
+import org.bson.Document;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +29,7 @@ import java.io.IOException;
 
 /**
  * @author wwinder
- *         Created on: 7/17/17
+ * Created on: 7/17/17
  */
 public class EmbeddedMongoTest {
 
@@ -51,23 +50,23 @@ public class EmbeddedMongoTest {
 
   @Test
   public void test() throws IOException {
-    BasicDBObject doc = new BasicDBObject("name", "MongoDB")
+    Document doc = new Document("name", "MongoDB")
         .append("type", "database")
         .append("count", 1)
         .append("info", new BasicDBObject("x", 203).append("y", 102));
 
     // Reset.
-    em.col.findAndRemove(doc);
+    em.col.findOneAndDelete(doc);
 
     // Before tests, nothing should be found.
-    Assert.assertNull(em.col.findOne(doc));
+    Assert.assertNull(em.col.find(doc).first());
 
     // Insert document, something should be found.
-    em.col.insert(doc);
-    Assert.assertNotNull(em.col.findOne(doc));
+    em.col.insertOne(doc);
+    Assert.assertNotNull(em.col.find(doc).first());
 
     // Removing document, nothing should be found.
-    em.col.findAndRemove(doc);
-    Assert.assertNull(em.col.findOne(doc));
+    em.col.findOneAndDelete(doc);
+    Assert.assertNull(em.col.find(doc).first());
   }
 }
