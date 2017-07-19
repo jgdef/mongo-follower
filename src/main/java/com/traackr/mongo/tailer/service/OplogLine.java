@@ -14,11 +14,11 @@
  */
 package com.traackr.mongo.tailer.service;
 
-import java.util.Arrays;
-
 import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.bson.types.BSONTimestamp;
+
+import java.util.Arrays;
 
 /**
  * @author wwinder

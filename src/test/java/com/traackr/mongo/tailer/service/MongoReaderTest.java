@@ -21,7 +21,6 @@ import org.bson.types.BSONTimestamp;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -36,7 +35,6 @@ import java.util.concurrent.Future;
  */
 // At this point I've been unable to get the `replicaSetStartMongo` method to properly start mongo
 // with a replicaset and oplog.
-@Ignore
 public class MongoReaderTest {
   MongoConnector mc;
   GlobalParams globalParams;
@@ -99,7 +97,8 @@ public class MongoReaderTest {
 
     int count = messageCount;
     while (count-- > 0) {
-      coll.insertOne(doc.append("_id", count));
+      // TODO: count is int and makes id an Integer if we don't convert
+      coll.insertOne(doc.append("_id", Integer.toString(count)));
     }
   }
 
@@ -111,8 +110,10 @@ public class MongoReaderTest {
 
     createDocuments(5, true);
 
+    Thread.sleep(100);
+
     // Make sure the message were detected in the oplog.
-    Mockito.verify(queue, times(5)).add(Mockito.any(Record.class));
+    Mockito.verify(queue, times(5)).put(Mockito.any(Record.class));
 
     globalParams.running.kill();
     executor.shutdownNow();

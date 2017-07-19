@@ -15,10 +15,11 @@
 
 package com.traackr.mongo.tailer.service.test_helpers;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -38,25 +39,23 @@ import de.flapdoodle.embed.process.runtime.Network;
 import org.bson.Document;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author wwinder
- *         Created on: 7/17/17
+ * Created on: 7/17/17
  */
 public class EmbeddedMongo {
-  private EmbeddedMongo() {}
+  private EmbeddedMongo() {
+  }
 
   MongodExecutable mongodExecutable = null;
   public MongodProcess mongod;
-  MongosExecutable mongosExecutable = null;
-  public MongosProcess mongos;
-
   public MongoClient mongo;
-  public DB db;
-  public DBCollection col;
+  public MongoDatabase db;
+  public MongoCollection<Document> col;
 
   // Simple example.
   public static EmbeddedMongo simpleStartMongo(Version.Main version) throws IOException {
@@ -75,51 +74,56 @@ public class EmbeddedMongo {
     em.mongod = em.mongodExecutable.start();
 
     em.mongo = new MongoClient(bindIp, port);
-    em.db = em.mongo.getDB("test");
-    em.col = em.db.createCollection("testCol", new BasicDBObject());
-    em.col.save(new BasicDBObject("testDoc", new Date()));
+    em.db = em.mongo.getDatabase("test");
+    em.db.createCollection("testCol", new CreateCollectionOptions());
+    em.col = em.db.getCollection("testCol");
+    em.col.insertOne(new Document("testDoc", new Date()));
 
     return em;
   }
 
   public static EmbeddedMongo replicaSetStartMongo(Version.Main version) throws IOException {
-    String dbdir = Files.createTempDirectory("test").toFile().getAbsolutePath();
+    final String host = "localhost";
+    final int port = Network.getFreeServerPort();
+    final EmbeddedMongo em = new EmbeddedMongo();
 
-    int mongosPort = Network.getFreeServerPort();
-    int mongodConfigPort = Network.getFreeServerPort();
-    String defaultHost = "localhost";
+    em.mongod = startMongod(version, port);
 
-    EmbeddedMongo em = new EmbeddedMongo();
+    final ServerAddress primaryAddr = new ServerAddress(host, port);
+    try (final MongoClient client = new MongoClient(primaryAddr)) {
+      final Document host0 = new Document("_id", 0)
+          .append("host", String.format("%s:%d", host, port));
+      final List<Document> members = new ArrayList<>();
+      members.add(host0);
+      final Document replSetSettings = new Document("_id", "testRepSet")
+          .append("members", members);
+      final MongoDatabase adminDb = client.getDatabase("admin");
 
-    em.mongod = startMongod(version, mongodConfigPort);
-
-    // init replica set, aka rs.initiate()
-    try (MongoClient client=new MongoClient(defaultHost, mongodConfigPort)) {
-      client.getDatabase("admin").runCommand(new Document("replSetInitiate", new Document()));
+      adminDb.runCommand(new Document("replSetInitiate", replSetSettings));
     }
 
-    em.mongos = startMongos(version, mongosPort, mongodConfigPort, defaultHost);
-
-    try (MongoClient mongoClient = new MongoClient(defaultHost, mongodConfigPort)) {
-      System.out.println("DB Names: " + mongoClient.getDatabaseNames());
+    try (MongoClient mongoClient = new MongoClient(primaryAddr)) {
+      System.out.println("DB Names: " + mongoClient.listDatabaseNames());
     }
 
     // Initialize some client stuffs.
-    em.mongo = new MongoClient(defaultHost, mongosPort);
-    em.db = em.mongo.getDB("testttt");
+    em.mongo = new MongoClient(primaryAddr);
+    em.db = em.mongo.getDatabase("testttt");
 
     try {
       Thread.sleep(5000);
-    } catch (Exception e) {}
-    //em.col = em.db.getCollection("testtttCol");
-    em.col = em.db.createCollection("testtttCol", new BasicDBObject());
-    em.col.save(new BasicDBObject("testDoc", new Date()));
+    } catch (Exception e) {
+    }
+    em.db.createCollection("testtttCol", new CreateCollectionOptions());
+    em.col = em.db.getCollection("testtttCol");
+    em.col.insertOne(new Document("testDoc", new Date()));
 
     return em;
   }
 
-  private static MongosProcess startMongos(Version.Main version, int port, int defaultConfigPort, String defaultHost) throws
-                                                                                         IOException {
+  private static MongosProcess startMongos(
+      Version.Main version, int port, int defaultConfigPort, String defaultHost) throws
+                                                                                 IOException {
     IMongosConfig mongosConfig = new MongosConfigBuilder()
         .version(version)
         .net(new Net(port, Network.localhostIsIPv6()))
@@ -131,18 +135,18 @@ public class EmbeddedMongo {
     return mongosExecutable.start();
   }
 
-  private static MongodProcess startMongod(Version.Main version, int defaultConfigPort) throws IOException {
+  private static MongodProcess startMongod(Version.Main version, int defaultConfigPort)
+      throws IOException {
     IMongodConfig mongoConfigConfig = new MongodConfigBuilder()
         .version(version)
         .net(new Net(defaultConfigPort, Network.localhostIsIPv6()))
-        .replication(new Storage(null, "testRepSet", 5000))
-        .configServer(true)
+        .replication(new Storage(null, "testRepSet", 500))
         .build();
 
-    MongodExecutable mongodExecutable = MongodStarter.getDefaultInstance().prepare(mongoConfigConfig);
+    MongodExecutable mongodExecutable = MongodStarter.getDefaultInstance()
+        .prepare(mongoConfigConfig);
     return mongodExecutable.start();
   }
-
 
 
   public void stopMongo() {
