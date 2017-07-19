@@ -2,7 +2,7 @@ package com.traackr.mongo.tailer.service;
 
 import static org.junit.Assert.assertEquals;
 
-import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.OplogEntry;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Created by wwinder on 6/24/16.
  */
-public class OplogLineTest {
+public class OplogEntryTest {
   @Before
   public void setUp() throws Exception {
 
@@ -87,20 +87,20 @@ public class OplogLineTest {
 
   @org.junit.Test
   public void oplogParsing() throws IOException {
-    OplogLine line = new OplogLine(getOplogInsert());
-    assertEquals(OplogLine.Operation.INSERT, line.getOperation());
-    assertEquals("50eaeb17aa413582b881b180f36504a3", line.getId());
+    OplogEntry entry = new OplogEntry(getOplogInsert());
+    assertEquals(OplogEntry.Operation.INSERT, entry.getOperation());
+    assertEquals("50eaeb17aa413582b881b180f36504a3", entry.getId());
 
-    line = new OplogLine(getOplogWholesaleUpdate());
-    assertEquals(OplogLine.Operation.UPDATE, line.getOperation());
-    assertEquals("50eaeb17aa413582b881b180f36504a3", line.getId());
+    entry = new OplogEntry(getOplogWholesaleUpdate());
+    assertEquals(OplogEntry.Operation.UPDATE, entry.getOperation());
+    assertEquals("50eaeb17aa413582b881b180f36504a3", entry.getId());
 
-    line = new OplogLine(getOplogSetUpdate());
-    assertEquals(OplogLine.Operation.UPDATE, line.getOperation());
-    assertEquals("50eaeb17aa413582b881b180f36504a3", line.getId());
+    entry = new OplogEntry(getOplogSetUpdate());
+    assertEquals(OplogEntry.Operation.UPDATE, entry.getOperation());
+    assertEquals("50eaeb17aa413582b881b180f36504a3", entry.getId());
 
-    line = new OplogLine(getOplogDelete());
-    assertEquals(OplogLine.Operation.DELETE, line.getOperation());
-    assertEquals("50eaeb17aa413582b881b180f36504a3", line.getId());
+    entry = new OplogEntry(getOplogDelete());
+    assertEquals(OplogEntry.Operation.DELETE, entry.getOperation());
+    assertEquals("50eaeb17aa413582b881b180f36504a3", entry.getId());
   }
 }

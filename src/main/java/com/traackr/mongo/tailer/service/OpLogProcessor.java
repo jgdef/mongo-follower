@@ -16,7 +16,7 @@ package com.traackr.mongo.tailer.service;
 
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
 import com.traackr.mongo.tailer.model.GlobalParams;
-import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.OplogEntry;
 import com.traackr.mongo.tailer.model.Record;
 
 import org.bson.types.BSONTimestamp;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Process OplogLine objects from a queue and send them to elasticsearch.
+ * Process OplogEntry objects from a queue and send them to elasticsearch.
  *
  * @author wwinder
  *         Created on: 5/25/16
@@ -63,18 +63,18 @@ public class OpLogProcessor implements Runnable {
         if (record != null) {
 
           // Initial import
-          if (record.importLine != null) {
-            oplogEventListener.importRecord(record.importLine);
+          if (record.importDocument != null) {
+            oplogEventListener.importDocument(record.importDocument);
           }
 
           // Oplog tail
-          else if (record.oplogLine != null) {
-            OplogLine doc = record.oplogLine;
+          else if (record.oplogEntry != null) {
+            OplogEntry doc = record.oplogEntry;
 
             // Process the document, manage oplog timestamp on success.
             BSONTimestamp oplogTime = doc.getTimestamp();
 
-            if (processDocument(doc)) {
+            if (processEntry(doc)) {
               globals.oplogTime = doc.getTimestamp();
             }
           }
@@ -88,33 +88,33 @@ public class OpLogProcessor implements Runnable {
   }
 
   /**
-   * Pass document to the indexing service. There is special handling for
-   * updates, adjacent updates are batched together.
-   * @param doc
-   * @return
+   * Pass oplog entry to the listener
+   *
+   * @param entry
+   * @return whether event was passed/processed by the listener without Exception
    */
-  private boolean processDocument(OplogLine doc) {
-    while (doc != null) {
+  private boolean processEntry(OplogEntry entry) {
+    while (entry != null) {
       try {
-        switch (doc.getOperation()) {
+        switch (entry.getOperation()) {
           case INSERT:
-            oplogEventListener.insert(doc.getUpdate(), doc);
+            oplogEventListener.insert(entry.getUpdate(), entry);
             break;
           case DELETE:
-            oplogEventListener.delete(doc.getId(), doc);
+            oplogEventListener.delete(entry.getId(), entry);
             break;
           case UPDATE:
-              oplogEventListener.update(doc.isWholesaleUpdate(), doc);
+              oplogEventListener.update(entry.isWholesaleUpdate(), entry);
             break;
           case COMMAND:
-            oplogEventListener.command(doc.getDocument(), doc);
+            oplogEventListener.command(entry.getDocument(), entry);
             break;
           case NOOP:
             break;
         }
-        doc = null;
+        entry = null;
       } catch (Exception e) {
-        logger.error("Problem indexing document: " + doc.getId(), e);
+        logger.error("Problem indexing document: " + entry.getId(), e);
         return false;
       }
     }

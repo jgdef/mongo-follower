@@ -15,7 +15,7 @@
 
 package com.traackr.mongo.tailer.interfaces;
 
-import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.OplogEntry;
 
 import org.bson.Document;
 
@@ -26,27 +26,29 @@ import org.bson.Document;
 public interface MongoEventListener {
 
   /**
-   * Initial import events come through this event.
-   * @param doc record being imported.
+   * Initial import documents come through this event.
+   *
+   * @param doc document being imported.
    */
-  void importRecord(Document doc);
+  void importDocument(Document doc);
 
   /**
    * Oplog delete event.
+   *
    * @param id
-   * @param oplog
+   * @param entry
    */
-  void delete(String id, OplogLine oplog);
+  void delete(String id, OplogEntry entry);
 
   /**
    * @param doc Document being inserted
    */
-  void insert(Document doc, OplogLine oplog);
+  void insert(Document doc, OplogEntry entry);
 
   /**
    * @param replace Whether this update completely replaces the existing document
    */
-  void update(boolean replace, OplogLine doc);
+  void update(boolean replace, OplogEntry entry);
 
-  void command(Document doc, OplogLine oplog);
+  void command(Document doc, OplogEntry entry);
 }

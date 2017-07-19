@@ -16,7 +16,7 @@
 package com.traackr.mongo.tailer.service;
 
 import com.traackr.mongo.tailer.model.OpLogTailerParams;
-import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.OplogEntry;
 import com.traackr.mongo.tailer.model.Record;
 
 import com.mongodb.BasicDBObject;
@@ -146,7 +146,7 @@ public class MongoReader implements Runnable {
         // If a document is taken, keep trying to add it to the queue.
         while (!put && params.globals.running.isRunning()) {
           try {
-            params.queue.put(new Record(new OplogLine(d)));
+            params.queue.put(new Record(new OplogEntry(d)));
             put = true;
           } catch (InterruptedException e) {
             logger.error("Interrupted while saving data to output queue.", e);

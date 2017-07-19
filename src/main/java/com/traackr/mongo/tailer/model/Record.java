@@ -22,16 +22,16 @@ import org.bson.Document;
  *         Created on: 12/14/16
  */
 public class Record {
-  public final OplogLine oplogLine;
-  public final Document importLine;
+  public final OplogEntry oplogEntry;
+  public final Document importDocument;
 
-  public Record(OplogLine line) {
-    oplogLine = line;
-    importLine = null;
+  public Record(OplogEntry entry) {
+    oplogEntry = entry;
+    importDocument = null;
   }
 
-  public Record(Document line) {
-    oplogLine = null;
-    importLine = line;
+  public Record(Document doc) {
+    oplogEntry = null;
+    importDocument = doc;
   }
 }

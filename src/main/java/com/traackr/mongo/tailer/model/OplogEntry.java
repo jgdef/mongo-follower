@@ -1,5 +1,5 @@
 /**
- * OpLogLine.java - Traackr, Inc.
+ * OpLogEntry.java - Traackr, Inc.
  *
  * This document set is the property of Traackr, Inc., a Massachusetts
  * Corporation, and contains confidential and trade secret information. It
@@ -25,7 +25,7 @@ import java.util.Arrays;
  * @author wwinder
  * Created on: 5/27/16
  */
-public class OplogLine {
+public class OplogEntry {
   private final Document document;
   private final String id;
   private final BSONTimestamp timestamp;
@@ -35,7 +35,7 @@ public class OplogLine {
   private final Document query;
   private boolean isWholesaleUpdate = false;
 
-  public OplogLine(Document doc) {
+  public OplogEntry(Document doc) {
     this.document = doc;
 
     BsonTimestamp ts = (BsonTimestamp) doc.get("ts");
@@ -103,7 +103,7 @@ public class OplogLine {
 
     final public String code;
 
-    private Operation(String code) {
+    Operation(String code) {
       this.code = code;
     }
 
