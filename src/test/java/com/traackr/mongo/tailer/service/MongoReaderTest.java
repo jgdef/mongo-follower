@@ -33,8 +33,6 @@ import java.util.concurrent.Future;
 /**
  * Created by wwinder on 6/17/16.
  */
-// At this point I've been unable to get the `replicaSetStartMongo` method to properly start mongo
-// with a replicaset and oplog.
 public class MongoReaderTest {
   MongoConnector mc;
   GlobalParams globalParams;
