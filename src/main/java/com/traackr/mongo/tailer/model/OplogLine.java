@@ -33,7 +33,6 @@ public class OplogLine {
   private final String namespace;
   private final Document updateSpec;
   private final Document query;
-
   private boolean isWholesaleUpdate = false;
 
   public OplogLine(Document doc) {

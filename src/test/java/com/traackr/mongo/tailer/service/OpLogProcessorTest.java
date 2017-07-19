@@ -15,9 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -32,14 +30,8 @@ public class OpLogProcessorTest {
   ArrayBlockingQueue<Record> queue;
   MongoEventListener eventListener;
 
-  @Captor
-  private ArgumentCaptor<OplogLine> bulkCaptor;
-
   @Before
   public void setUp() throws Exception {
-    // Initialize "Captor" annotation.
-    MockitoAnnotations.initMocks(this);
-
     globalParams = new GlobalParams(
         true,
         new KillSwitch(),
@@ -57,8 +49,6 @@ public class OpLogProcessorTest {
 
   @Test
   public void testProcessQueue() throws Exception {
-    boolean failed = false;
-
     queue.add(new Record(new OplogLine(OplogLineTest.getOplogInsert())));
     queue.add(new Record(new OplogLine(OplogLineTest.getOplogWholesaleUpdate())));
     queue.add(new Record(new OplogLine(OplogLineTest.getOplogDelete())));
