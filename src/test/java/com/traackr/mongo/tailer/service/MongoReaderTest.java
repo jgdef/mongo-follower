@@ -1,12 +1,13 @@
 package com.traackr.mongo.tailer.service;
 
 import static com.mongodb.client.model.Filters.gte;
+import static com.traackr.mongo.tailer.service.helpers.EmbeddedMongo.createDocuments;
 import static org.mockito.Mockito.times;
 
 import com.traackr.mongo.tailer.model.GlobalParams;
 import com.traackr.mongo.tailer.model.OpLogTailerParams;
 import com.traackr.mongo.tailer.model.Record;
-import com.traackr.mongo.tailer.service.test_helpers.EmbeddedMongo;
+import com.traackr.mongo.tailer.service.helpers.EmbeddedMongo;
 import com.traackr.mongo.tailer.util.KillSwitch;
 
 import com.mongodb.BasicDBObject;
@@ -77,28 +78,6 @@ public class MongoReaderTest {
 
   }
 
-  /**
-   * Helper that creates some documents.
-   */
-  private void createDocuments(final int messageCount, final boolean withCleanup) {
-    MongoDatabase db = em.getClient().getDatabase(this.db);
-    MongoCollection<Document> coll = db.getCollection(this.collection);
-
-    Document doc = new Document("name", "MongoDB")
-        .append("type", "database")
-        .append("info", new BasicDBObject("x", 203).append("y", 102));
-
-    if (withCleanup) {
-      coll.findOneAndDelete(gte("count", 0));
-    }
-
-    int count = messageCount;
-    while (count-- > 0) {
-      // TODO: count is int and makes id an Integer if we don't convert
-      coll.insertOne(doc.append("_id", Integer.toString(count)));
-    }
-  }
-
   @Test
   public void testConnection() throws Exception {
     // Start oplog tailer.
@@ -106,7 +85,7 @@ public class MongoReaderTest {
     Future future = executor.submit(tailer);
 
     // Add some documents to mongo / oplog.
-    createDocuments(5, true);
+    createDocuments(em, this.db, this.collection, 5, true);
 
     Thread.sleep(100);
 

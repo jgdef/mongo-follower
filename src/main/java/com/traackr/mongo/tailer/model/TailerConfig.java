@@ -16,6 +16,9 @@
 package com.traackr.mongo.tailer.model;
 
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
+import com.traackr.mongo.tailer.service.MongoConnector;
+
+import java.util.concurrent.ArrayBlockingQueue;
 
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +31,12 @@ import lombok.NonNull;
 @Data
 @Builder
 public class TailerConfig {
+  /**
+   *
+   */
+  @NonNull
+  ArrayBlockingQueue<Record> queue;
+
   /**
    * The callback handler.
    */
@@ -47,10 +56,10 @@ public class TailerConfig {
   Boolean dryRun;
 
   /**
-   * Mongo connection string.
+   * Mongo connector.
    */
   @NonNull
-  String mongoConnectionString;
+  MongoConnector mongoConnector;
 
   /**
    * Which database to tail.

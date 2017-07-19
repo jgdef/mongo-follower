@@ -13,13 +13,14 @@
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
 
-package com.traackr.mongo.tailer.service.test_helpers;
+package com.traackr.mongo.tailer.service.helpers;
 
+import static com.mongodb.client.model.Filters.gte;
+
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.CreateCollectionOptions;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -40,7 +41,6 @@ import org.bson.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -60,6 +60,30 @@ public class EmbeddedMongo {
 
   public MongoClient getClient() {
     return new MongoClient(host, port);
+  }
+
+  /**
+   * Helper that creates some documents.
+   */
+  public static void createDocuments(EmbeddedMongo em, String database, String collection,
+                                     final int messageCount, final boolean withCleanup) {
+    MongoDatabase db = em.getClient().getDatabase(database);
+    MongoCollection<Document> col = db.getCollection(collection);
+
+
+    if (withCleanup) {
+      col.findOneAndDelete(gte("count", 0));
+    }
+
+    int count = messageCount;
+    while (count-- > 0) {
+      // TODO: count is int and makes id an Integer if we don't convert
+      Document doc = new Document("name", "MongoDB")
+          .append("type", "database")
+          .append("info", new BasicDBObject("x", 203).append("y", 102))
+          .append("_id", Integer.toString(count));
+      col.insertOne(doc);
+    }
   }
 
   /**
@@ -137,9 +161,12 @@ public class EmbeddedMongo {
 
 
   public void stopMongo() {
+    // This isn't always working.
+    /*
     if (mongodExecutable != null) {
       mongodExecutable.stop();
     }
     mongodExecutable = null;
+    */
   }
 }

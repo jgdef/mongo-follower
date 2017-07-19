@@ -1,5 +1,5 @@
 /**
- * OpLogTailerParams.java - Traackr, Inc.
+ * TestConstants.java - Traackr, Inc.
  *
  * This document set is the property of Traackr, Inc., a Massachusetts
  * Corporation, and contains confidential and trade secret information. It
@@ -12,32 +12,15 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
-package com.traackr.mongo.tailer.model;
 
-import com.traackr.mongo.tailer.service.MongoConnector;
+package com.traackr.mongo.tailer.service.helpers;
 
-import java.util.concurrent.BlockingQueue;
-
-import lombok.Value;
-import lombok.NonNull;
+import de.flapdoodle.embed.mongo.distribution.Version;
 
 /**
  * @author wwinder
- *         Created on: 5/29/16
+ * Created on: 7/19/17
  */
-@Value(staticConstructor="with")
-public class OpLogTailerParams {
-  @NonNull
-  public GlobalParams globals;
-  @NonNull
-  public boolean doImport;
-  @NonNull
-  public BlockingQueue<Record> queue;
-  @NonNull
-  public MongoConnector connector;
-  @NonNull
-  public String database;
-  @NonNull
-  public String collection;
+public class TestConstants {
+  public final static Version.Main EMBEDDED_MONGO_VERSION = Version.Main.V3_5;
 }
-
