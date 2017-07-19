@@ -17,10 +17,9 @@ package com.traackr.mongo.tailer.model;
 
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
 
-import com.sun.istack.internal.NotNull;
-
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 /**
  * @author wwinder
@@ -32,50 +31,50 @@ public class TailerConfig {
   /**
    * The callback handler.
    */
-  @NotNull
+  @NonNull
   MongoEventListener listener;
 
   /**
    * Location of oplog file.
    */
-  @NotNull
+  @NonNull
   String oplogFile;
 
   /**
    * ???
    */
-  @NotNull
+  @NonNull
   Boolean dryRun;
 
   /**
    * Mongo connection string.
    */
-  @NotNull
+  @NonNull
   String mongoConnectionString;
 
   /**
    * Which database to tail.
    */
-  @NotNull
+  @NonNull
   String mongoDatabase;
 
   /**
    * Which collection to tail.
    */
-  @NotNull
+  @NonNull
   String mongoCollection;
 
   /**
    * Whether to do an initial import on the collection before oplog tailing.
    * TODO: Default value.
    */
-  @NotNull
+  @NonNull
   Boolean initialImport;
 
   /**
    * Number of messages to hold in memory before the oplog tailer begins to block.
    * TODO: Default value.
    */
-  @NotNull
+  @NonNull
   Integer queueSize;
 }
