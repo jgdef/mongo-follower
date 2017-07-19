@@ -19,8 +19,6 @@ import com.traackr.mongo.tailer.model.OplogLine;
 
 import org.bson.Document;
 
-import java.util.Collection;
-
 /**
  * @author wwinder
  *         Created on: 12/8/16
@@ -41,29 +39,14 @@ public interface MongoEventListener {
   void delete(String id, OplogLine oplog);
 
   /**
-   * @param wholesale this is an update being treated as an insert.
+   * @param doc Document being inserted
    */
-  void insert(boolean wholesale, Document doc, OplogLine oplog);
+  void insert(Document doc, OplogLine oplog);
 
   /**
-   * Different approaches to an update...
-   *
-   * Elasticsearch-river-mondodb:
-   * 1. Query mongo for the document being updated.
-   * 2. Insert the results of that query.
-   *
-   * Mongo-connector:
-   * 1. Query elasticsearch for the document being updated.
-   * 2. Apply the update to the retrieved document.
-   * 3. Delete the document from elasticsearch.
-   * 4. Insert the new document as usual.
+   * @param replace Whether this update completely replaces the existing document
    */
-  void update(OplogLine doc);
-
-  /**
-   * Bulk update a collection of documents by their id.
-   */
-  void bulkUpdate(Collection<OplogLine> docs);
+  void update(boolean replace, OplogLine doc);
 
   void command(Document doc, OplogLine oplog);
 }

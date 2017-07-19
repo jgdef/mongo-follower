@@ -12,6 +12,7 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
+
 package com.traackr.mongo.tailer.model;
 
 import org.bson.BsonTimestamp;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 
 /**
  * @author wwinder
- *         Created on: 5/27/16
+ * Created on: 5/27/16
  */
 public class OplogLine {
   private final Document document;
@@ -32,6 +33,8 @@ public class OplogLine {
   private final String namespace;
   private final Document updateSpec;
   private final Document query;
+
+  private boolean isWholesaleUpdate = false;
 
   public OplogLine(Document doc) {
     this.document = doc;
@@ -43,12 +46,15 @@ public class OplogLine {
     query = (Document) doc.get("o2");
     updateSpec = (Document) doc.get("o");
 
-    switch(operation) {
+    switch (operation) {
       case DELETE:
       case INSERT:
         id = (String) updateSpec.get("_id");
         break;
       case UPDATE:
+        if (isWholesaleUpdate(updateSpec)) {
+          isWholesaleUpdate = true;
+        }
         id = (String) query.get("_id");
         break;
       default:
@@ -64,6 +70,7 @@ public class OplogLine {
   public String getId() {
     return id;
   }
+
   public BSONTimestamp getTimestamp() {
     return timestamp;
   }
@@ -82,6 +89,10 @@ public class OplogLine {
 
   public Document getUpdate() {
     return updateSpec;
+  }
+
+  public boolean isWholesaleUpdate() {
+    return isWholesaleUpdate;
   }
 
   public enum Operation {
@@ -103,6 +114,13 @@ public class OplogLine {
           .findFirst()
           .orElse(null);
     }
+  }
+
+  /**
+   * Check if the operation is an update replacing the entire document.
+   */
+  private static boolean isWholesaleUpdate(final Document doc) {
+    return !doc.containsKey("$set") && !doc.containsKey("$unset");
   }
 }
 

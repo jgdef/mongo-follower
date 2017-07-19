@@ -12,6 +12,7 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
+
 package com.traackr.mongo.tailer.service;
 
 import com.traackr.mongo.tailer.model.OpLogTailerParams;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * to process.
  *
  * @author wwinder
- *         Created on: 5/25/16
+ * Created on: 5/25/16
  */
 public class MongoReader implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(MongoReader.class);
@@ -124,7 +125,7 @@ public class MongoReader implements Runnable {
           logger.error("Oplog tailer interrupted...", e);
         }
       }
-    }  finally {
+    } finally {
       logger.error("OpLogTailer thread is terminating.");
       client.close();
     }
@@ -132,7 +133,9 @@ public class MongoReader implements Runnable {
 
   /**
    * The main oplog processing loop.
-   * @param cursor the cursor to process.
+   *
+   * @param cursor
+   *     the cursor to process.
    */
   private void process(MongoCursor<Document> cursor) throws Exception {
     while (params.globals.running.isRunning()) {
@@ -155,5 +158,7 @@ public class MongoReader implements Runnable {
       Thread.sleep(1000);
     }
   }
+
+
 }
 
