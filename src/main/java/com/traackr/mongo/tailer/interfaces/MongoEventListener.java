@@ -31,19 +31,19 @@ public interface MongoEventListener {
    * Initial import events come through this event.
    * @param doc record being imported.
    */
-  public void importRecord(Document doc);
+  void importRecord(Document doc);
 
   /**
    * Oplog delete event.
    * @param id
    * @param oplog
    */
-  public void delete(String id, OplogLine oplog);
+  void delete(String id, OplogLine oplog);
 
   /**
    * @param wholesale this is an update being treated as an insert.
    */
-  public void insert(boolean wholesale, Document doc, OplogLine oplog);
+  void insert(boolean wholesale, Document doc, OplogLine oplog);
 
   /**
    * Different approaches to an update...
@@ -58,12 +58,12 @@ public interface MongoEventListener {
    * 3. Delete the document from elasticsearch.
    * 4. Insert the new document as usual.
    */
-  public void update(OplogLine doc);
+  void update(OplogLine doc);
 
   /**
    * Bulk update a collection of documents by their id.
    */
-  public void bulkUpdate(Collection<OplogLine> docs);
+  void bulkUpdate(Collection<OplogLine> docs);
 
-  public void command(Document doc, OplogLine oplog);
+  void command(Document doc, OplogLine oplog);
 }
