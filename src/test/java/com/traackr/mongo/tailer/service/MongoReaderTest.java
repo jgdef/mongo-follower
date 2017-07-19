@@ -3,9 +3,9 @@ package com.traackr.mongo.tailer.service;
 import static com.mongodb.client.model.Filters.gte;
 import static org.mockito.Mockito.times;
 
-import com.traackr.mongo.tailer.connection.MongoConnector;
-import com.traackr.mongo.tailer.params.GlobalParams;
-import com.traackr.mongo.tailer.params.OpLogTailerParams;
+import com.traackr.mongo.tailer.model.GlobalParams;
+import com.traackr.mongo.tailer.model.OpLogTailerParams;
+import com.traackr.mongo.tailer.model.Record;
 import com.traackr.mongo.tailer.service.test_helpers.EmbeddedMongo;
 import com.traackr.mongo.tailer.util.KillSwitch;
 
@@ -47,10 +47,7 @@ public class MongoReaderTest {
 
   @Before
   public void setUp() throws Exception {
-    //if (1 == 1) {
-    //  throw new IllegalArgumentException("...");
-    //}
-    em = EmbeddedMongo.replicaSetStartMongo(Version.Main.V3_0);
+    em = EmbeddedMongo.replicaSetStartMongo(Version.Main.V3_4);
 
     // Inject embedded mongo client.
     mc = Mockito.mock(MongoConnector.class);
@@ -104,10 +101,11 @@ public class MongoReaderTest {
 
   @Test
   public void testConnection() throws Exception {
-
+    // Start oplog tailer.
     ExecutorService executor = Executors.newFixedThreadPool(1);
     Future future = executor.submit(tailer);
 
+    // Add some documents to mongo / oplog.
     createDocuments(5, true);
 
     Thread.sleep(100);

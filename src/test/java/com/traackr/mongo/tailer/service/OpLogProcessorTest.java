@@ -2,8 +2,10 @@ package com.traackr.mongo.tailer.service;
 
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-import com.traackr.mongo.tailer.interfaces.IMongoEventListener;
-import com.traackr.mongo.tailer.params.GlobalParams;
+import com.traackr.mongo.tailer.interfaces.MongoEventListener;
+import com.traackr.mongo.tailer.model.GlobalParams;
+import com.traackr.mongo.tailer.model.OplogLine;
+import com.traackr.mongo.tailer.model.Record;
 import com.traackr.mongo.tailer.util.KillSwitch;
 
 import org.bson.Document;
@@ -29,7 +31,7 @@ import java.util.concurrent.Future;
 public class OpLogProcessorTest {
   GlobalParams globalParams;
   ArrayBlockingQueue<Record> queue;
-  IMongoEventListener eventListener;
+  MongoEventListener eventListener;
 
   @Captor
   private ArgumentCaptor<Collection<OplogLine>> bulkCaptor;
@@ -46,7 +48,7 @@ public class OpLogProcessorTest {
         "yyyy-MM-dd'T'HH:mm:ss",
         true);
     queue = new ArrayBlockingQueue<>(4000);
-    eventListener = Mockito.mock(IMongoEventListener.class);
+    eventListener = Mockito.mock(MongoEventListener.class);
   }
 
   @After

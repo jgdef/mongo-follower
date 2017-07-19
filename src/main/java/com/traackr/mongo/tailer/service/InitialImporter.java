@@ -15,6 +15,8 @@
 
 package com.traackr.mongo.tailer.service;
 
+import com.traackr.mongo.tailer.model.Record;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;

@@ -15,7 +15,7 @@
 
 package com.traackr.mongo.tailer.interfaces;
 
-import com.traackr.mongo.tailer.service.OplogLine;
+import com.traackr.mongo.tailer.model.OplogLine;
 
 import org.bson.Document;
 
@@ -25,7 +25,7 @@ import java.util.Collection;
  * @author wwinder
  *         Created on: 12/8/16
  */
-public interface IMongoEventListener {
+public interface MongoEventListener {
 
   /**
    * Initial import events come through this event.
