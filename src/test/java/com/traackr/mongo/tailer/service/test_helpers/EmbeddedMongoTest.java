@@ -16,6 +16,10 @@
 package com.traackr.mongo.tailer.service.test_helpers;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
 
 import de.flapdoodle.embed.mongo.distribution.Version;
 
@@ -26,6 +30,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author wwinder
@@ -34,11 +40,18 @@ import java.io.IOException;
 public class EmbeddedMongoTest {
 
   EmbeddedMongo em;
+  MongoCollection<Document> col;
 
   @Before
   public void setup() throws IOException {
     //em = replicaSetStartMongo(Version.Main.V3_3);
     em = EmbeddedMongo.simpleStartMongo(Version.Main.V3_4);
+
+    MongoClient mongo = em.getClient();
+    MongoDatabase db = mongo.getDatabase("test");
+    db.createCollection("testCol", new CreateCollectionOptions());
+    col = db.getCollection("testCol");
+    col.insertOne(new Document("testDoc", new Date()));
   }
 
   @After
@@ -56,17 +69,17 @@ public class EmbeddedMongoTest {
         .append("info", new BasicDBObject("x", 203).append("y", 102));
 
     // Reset.
-    em.col.findOneAndDelete(doc);
+    col.findOneAndDelete(doc);
 
     // Before tests, nothing should be found.
-    Assert.assertNull(em.col.find(doc).first());
+    Assert.assertNull(col.find(doc).first());
 
     // Insert document, something should be found.
-    em.col.insertOne(doc);
-    Assert.assertNotNull(em.col.find(doc).first());
+    col.insertOne(doc);
+    Assert.assertNotNull(col.find(doc).first());
 
     // Removing document, nothing should be found.
-    em.col.findOneAndDelete(doc);
-    Assert.assertNull(em.col.find(doc).first());
+    col.findOneAndDelete(doc);
+    Assert.assertNull(col.find(doc).first());
   }
 }
