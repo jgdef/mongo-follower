@@ -44,7 +44,7 @@ public class OpLogProcessorTest {
         true);
     queue = new ArrayBlockingQueue<>(4000);
     eventListener = Mockito.mock(MongoEventListener.class);
-    Mockito.doCallRealMethod().when(eventListener).process(any(OplogEntry.class));
+    Mockito.doCallRealMethod().when(eventListener).dispatch(any(OplogEntry.class));
   }
 
   @After

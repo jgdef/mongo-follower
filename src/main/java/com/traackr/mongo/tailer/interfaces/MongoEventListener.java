@@ -28,7 +28,12 @@ import org.bson.Document;
  *         Created on: 12/8/16
  */
 public interface MongoEventListener {
-  default void process(final OplogEntry entry) {
+  /**
+   * Dispatch the latest oplog entry to the listener
+   *
+   * @param entry
+   */
+  default void dispatch(final OplogEntry entry) {
     if (entry instanceof Insert) {
       insert((Insert) entry);
     } else if (entry instanceof Update) {

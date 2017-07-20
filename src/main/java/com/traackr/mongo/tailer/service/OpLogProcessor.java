@@ -98,7 +98,7 @@ public class OpLogProcessor implements Runnable {
   private boolean processEntry(OplogEntry entry) {
     if (entry != null) {
       try {
-        oplogEventListener.process(entry);
+        oplogEventListener.dispatch(entry);
       } catch (Exception e) {
         logger.error("Problem processing entry: {}", entry, e);
         return false;
