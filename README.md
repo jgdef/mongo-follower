@@ -1,6 +1,7 @@
 # Mongo Follower
 
-A simple, robust and flexible interface for streaming data out of MongoDB.
+A simple, robust and flexible interface for streaming document events out of MongoDB.
+
 
 ## Key features
 * **Resumable**. An oplog timestamp is maintained which allows for restarting `MongoFollower` to resume processing. The timestamp can be configured with:
@@ -9,19 +10,28 @@ A simple, robust and flexible interface for streaming data out of MongoDB.
 * **Initial import**. By starting the process with an initial import all documents can be exported effortlessly.
 * **Runner harness**. The `Runner` utilities make setting up a follower a breeze.
 
+
 ## Options
 
-| builderOption | type | default value | description |
+| property name | builderOption / type | default value | description |
 | ------------- | ---- | ------------- | ----------- |
-|`listener` | MongoEventListener | --- | A class extending the `MongoEventListener` interface to process events. |
-|`initialImport` | Boolean | false | Toggle whether or not an initial import should be performed. |
-|`oplogFile` | String | --- | The absolute path to the oplog file, this needs to be accessible for reading and writing by the user running MongoFollower. |
-|`mongoConnectionString` | String | --- | Standard MongoDB connection string. |
-|`mongoDatabase` | String | --- | Database containing the collection to be followed. |
-|`mongoCollection` | String | --- | Collection being followed. |
-| `oplogDelayMinutes` | int | 10 | Number of minutes to lag behind the oplog. By delaying the oplog you can restart your process without missing any events. Note that this expects that it is ok to send the same event multiple times as long as they are sent in order. |
-|`oplogUpdateIntervalMinutes` | int | 10 | The number of minutes to wait between updating the oplog timestamp file. |
-|`queue` | BlockingQueue<Record> | ArrayBlockingQueue<>(4000) | Optionally override the queue implementation with something custom or with a different capacity. |
+| n/a | listener / MongoEventListener | --- | A class extending the `MongoEventListener` interface to process events. |
+| initial-import | initialImport / Boolean | false | Toggle whether or not an initial import should be performed. |
+| oplog-file | oplogFile / String | --- | The absolute path to the oplog file, this needs to be accessible for reading and writing by the user running MongoFollower. |
+| mongo.oplog-delay | mongoConnectionString / String | --- | Standard MongoDB connection string. |
+| mongo.database | mongoDatabase / String | --- | Database containing the collection to be followed. |
+| mongo.collection | mongoCollection / String | --- | Collection being followed. |
+| mongo.oplog-delay | oplogDelayMinutes / int | 10 | Number of minutes to lag behind the oplog. By delaying the oplog you can restart your process without missing any events. Note that this expects that it is ok to send the same event multiple times as long as they are sent in order. |
+| mongo.oplog-interval | oplogUpdateIntervalMinutes / int | 10 | The number of minutes to wait between updating the oplog timestamp file. |
+| queue-size | queue / BlockingQueue<Record> | ArrayBlockingQueue<>(4000) | Optionally override the queue implementation with something custom or with a different capacity. |
+
+
+## Use cases
+
+- Event monitoring / auditing: setting a certain field indicates a document `merge` for your business
+- Synchronizing databases: Re-index to elasticsearch each time a document changes
+- Migration / Backup: map documents to Postgres, MySQL, Cassandra, CSV
+- Performance auditing: Detect inefficient usage patterns, such as many small frequent updates to a document instead of one larger update.
 
 
 ## How it works
@@ -30,9 +40,35 @@ The mongo follower is a two step process to efficiently export data from a colle
 1. An initial export gets the bulk of your historic documents out of the collection. This can be disabled by setting `initialImport` to `false`.
 2. A MongoDB oplog tailing process is started which keeps processing events as they occur.
 
+The interface is driven by extending the `MongoEventListener` and providing an instance of the listener to the `Runner` utility.
+```java
+
+    TailerConfig tc = TailerConfig.builder()
+        .listener(new MyListener())
+        .dryRun(false)
+        .initialImport(false)
+        .mongoConnectionString(connectionString)
+        .mongoDatabase(database)
+        .mongoCollection(collection)
+        .oplogFile("/tmp/testapp/oplogfile")
+        .build();
+
+    Runner.run(tc);
+```
+
+Alternatively a property file can be used to make it easier to switch between development and production environments:
+```java
+    Properties props = new Properties();
+    InputStream steam = ...; // open file or resource
+    props.load(stream);
+
+    Runner.run(props, new MyListener());
+```
+
+
 ## Example
 
-Here is a complete working example which will process all documents of a given collection specified on the command line. To process all documents from a given instance, database, collection:
+Here is a [short, self contained, correct (compilable), example](http://sscce.org/) which will process all documents of a given collection specified on the command line. To process all documents from a given instance, database, collection:
 ```
 java -jar TestApp.jar mongodb://localhost:27017 test_database test_collection
 ```
