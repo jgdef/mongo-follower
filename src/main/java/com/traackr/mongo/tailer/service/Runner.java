@@ -21,6 +21,7 @@ import com.traackr.mongo.tailer.exceptions.FailedToStartException;
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
 import com.traackr.mongo.tailer.model.GlobalParams;
 import com.traackr.mongo.tailer.model.OpLogTailerParams;
+import com.traackr.mongo.tailer.model.OplogTimestampWriter;
 import com.traackr.mongo.tailer.model.Record;
 import com.traackr.mongo.tailer.model.TailerConfig;
 import com.traackr.mongo.tailer.util.KillSwitch;
@@ -56,6 +57,8 @@ public class Runner {
         config.getDryRun(),
         new KillSwitch(),
         getOplogTimestamp(config.getOplogFile()),
+        config.getOplogDelayMinutes(),
+        config.getOplogUpdateIntervalMinutes(),
         null,
         false
     );
@@ -76,22 +79,27 @@ public class Runner {
     // Initialize OpLogProcessor
     OpLogProcessor oplogProcessor = new OpLogProcessor(globalParams, config.getQueue(), config.getListener());
 
+    // Oplog writer
+    OplogTimestampWriter oplogWriter = new OplogTimestampWriter(globalParams);
+
     ///////////////////
     // Start threads //
     ///////////////////
-    launchThreads(config.getQueue(), oplogTailer, oplogProcessor);
+    launchThreads(config.getQueue(), oplogTailer, oplogProcessor, oplogWriter);
   }
 
   private static void launchThreads(
                              final BlockingQueue<Record> queue,
                              MongoReader oplogTailer,
-                             OpLogProcessor oplogProcessor) {
-    final ThreadPoolExecutor pool = new ThreadPoolExecutor(3, 3,
+                             OpLogProcessor oplogProcessor,
+                             OplogTimestampWriter oplogWriter) {
+    final ThreadPoolExecutor pool = new ThreadPoolExecutor(4, 4,
         0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<Runnable>());
 
     pool.submit(oplogTailer);
     pool.submit(oplogProcessor);
+    pool.submit(oplogWriter);
 
     // This seems weird.
     pool.submit(() -> {
@@ -130,6 +138,8 @@ public class Runner {
           .queue(new ArrayBlockingQueue<>(Integer.valueOf(properties.getProperty("queue-size"))))
           .dryRun(Boolean.valueOf(properties.getProperty("dry-run")))
           .oplogFile(properties.getProperty("oplog-file"))
+          .oplogDelayMinutes(Integer.valueOf(properties.getProperty("mongo.oplog-delay")))
+          .oplogUpdateIntervalMinutes(Integer.valueOf(properties.getProperty("mongo.oplog-interval")))
           .initialImport(Boolean.valueOf(properties.getProperty("initial-import")))
           .mongoConnectionString(properties.getProperty("mongo.connection-string"))
           .mongoDatabase(properties.getProperty("mongo.database"))

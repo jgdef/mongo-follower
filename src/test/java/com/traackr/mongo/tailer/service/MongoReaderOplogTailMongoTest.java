@@ -55,6 +55,8 @@ public class MongoReaderOplogTailMongoTest {
         true,
         new KillSwitch(),
         new BSONTimestamp((int) (timestamp.getTime() / 1000), 0),
+        0,
+        0,
         "yyyy-MM-dd'T'HH:mm:ss",
         true);
   }
