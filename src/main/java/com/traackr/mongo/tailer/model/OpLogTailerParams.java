@@ -14,8 +14,6 @@
  */
 package com.traackr.mongo.tailer.model;
 
-import com.traackr.mongo.tailer.service.MongoConnector;
-
 import java.util.concurrent.BlockingQueue;
 
 import lombok.Value;
@@ -30,11 +28,11 @@ public class OpLogTailerParams {
   @NonNull
   public GlobalParams globals;
   @NonNull
-  public boolean doImport;
+  public Boolean doImport;
   @NonNull
   public BlockingQueue<Record> queue;
   @NonNull
-  public MongoConnector connector;
+  public String connectionString;
   @NonNull
   public String database;
   @NonNull

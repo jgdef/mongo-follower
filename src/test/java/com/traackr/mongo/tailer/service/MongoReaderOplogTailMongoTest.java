@@ -40,7 +40,6 @@ import java.util.concurrent.BlockingQueue;
  */
 public class MongoReaderOplogTailMongoTest {
   EmbeddedMongo em;
-  MongoConnector emConnector;
   BlockingQueue<Record> spyQueue = Mockito.spy(new ArrayBlockingQueue<>(4000));
   static final String DATABASE = "mrot_test_db";
   static final String COLLECTION = "mrot_test_collection";
@@ -49,11 +48,6 @@ public class MongoReaderOplogTailMongoTest {
   @Before
   public void setup() throws Exception {
     em = EmbeddedMongo.replicaSetStartMongo(EMBEDDED_MONGO_VERSION);
-
-    // Inject embedded mongo client.
-    emConnector = Mockito.mock(MongoConnector.class);
-    Mockito.doReturn(em.getClient()).when(emConnector).getClient();
-
   }
 
   private static GlobalParams globalsAtTime(Date timestamp) {
@@ -74,7 +68,7 @@ public class MongoReaderOplogTailMongoTest {
         globalsAtTime(new Date(0)), // start at the beginning of time
         false,
         spyQueue,
-        emConnector,
+        em.getConnectionString(),
         DATABASE,
         COLLECTION);
     MongoReader tailer = new MongoReader(params);
@@ -101,7 +95,7 @@ public class MongoReaderOplogTailMongoTest {
         globalsAtTime(new Date()), // start at now
         true,
         spyQueue,
-        emConnector,
+        em.getConnectionString(),
         DATABASE,
         COLLECTION);
     MongoReader tailer = new MongoReader(params);
@@ -122,7 +116,7 @@ public class MongoReaderOplogTailMongoTest {
         globalsAtTime(new Date()), // start at now
         true,
         spyQueue,
-        emConnector,
+        em.getConnectionString(),
         DATABASE,
         COLLECTION);
     MongoReader tailer = new MongoReader(params);
@@ -155,7 +149,7 @@ public class MongoReaderOplogTailMongoTest {
         globalsAtTime(new Date(0)), // start at the beginning of time
         false,
         spyQueue,
-        emConnector,
+        em.getConnectionString(),
         DATABASE,
         COLLECTION);
     MongoReader tailer = new MongoReader(params);
@@ -168,7 +162,7 @@ public class MongoReaderOplogTailMongoTest {
 
     // Insert documents AFTER the tailer was started
     createDocuments(em, DATABASE, COLLECTION, 100, true);
-    
+
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());

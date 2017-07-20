@@ -62,6 +62,10 @@ public class EmbeddedMongo {
     return new MongoClient(host, port);
   }
 
+  public String getConnectionString() {
+    return "mongodb://" + host + ":" + port;
+  }
+
   /**
    * Helper that creates some documents.
    */

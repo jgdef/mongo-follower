@@ -66,7 +66,7 @@ public class Runner {
           globalParams,
           config.getInitialImport(),
           config.getQueue(),
-          new MongoConnector(config.getMongoConnectionString()),
+          config.getMongoConnectionString(),
           config.getMongoDatabase(),
           config.getMongoCollection());
 
