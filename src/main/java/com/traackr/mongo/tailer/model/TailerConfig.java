@@ -19,6 +19,7 @@ import com.traackr.mongo.tailer.interfaces.MongoEventListener;
 import com.traackr.mongo.tailer.service.MongoConnector;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import lombok.Builder;
 import lombok.Data;
@@ -32,10 +33,11 @@ import lombok.NonNull;
 @Builder
 public class TailerConfig {
   /**
-   *
+   * The thread-safe queue to use.
    */
   @NonNull
-  ArrayBlockingQueue<Record> queue;
+  @Builder.Default
+  BlockingQueue<Record> queue = new ArrayBlockingQueue<>(4000);
 
   /**
    * The callback handler.
@@ -53,13 +55,14 @@ public class TailerConfig {
    * ???
    */
   @NonNull
-  Boolean dryRun;
+  @Builder.Default
+  Boolean dryRun = true;
 
   /**
-   * Mongo connector.
+   * Mongo connection string.
    */
   @NonNull
-  MongoConnector mongoConnector;
+  String mongoConnectionString;
 
   /**
    * Which database to tail.
@@ -78,12 +81,6 @@ public class TailerConfig {
    * TODO: Default value.
    */
   @NonNull
-  Boolean initialImport;
-
-  /**
-   * Number of messages to hold in memory before the oplog tailer begins to block.
-   * TODO: Default value.
-   */
-  @NonNull
-  Integer queueSize;
+  @Builder.Default
+  Boolean initialImport = false;
 }

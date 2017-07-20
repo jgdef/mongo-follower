@@ -66,7 +66,7 @@ public class Runner {
           globalParams,
           config.getInitialImport(),
           config.getQueue(),
-          config.getMongoConnector(),
+          new MongoConnector(config.getMongoConnectionString()),
           config.getMongoDatabase(),
           config.getMongoCollection());
 
@@ -131,9 +131,9 @@ public class Runner {
           .dryRun(Boolean.valueOf(properties.getProperty("dry-run")))
           .oplogFile(properties.getProperty("oplog-file"))
           .initialImport(Boolean.valueOf(properties.getProperty("initial-import")))
-          .mongoConnector(new MongoConnector(properties.getProperty("mongo.connection-string")))
+          .mongoConnectionString(properties.getProperty("mongo.connection-string"))
           .mongoDatabase(properties.getProperty("mongo.database"))
-          .mongoDatabase(properties.getProperty("mongo.collection"))
+          .mongoCollection(properties.getProperty("mongo.collection"))
           .build();
       run(config);
     } catch (Exception e) {
