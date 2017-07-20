@@ -94,8 +94,6 @@ import java.io.IOException;
 public class TestApp implements MongoEventListener {
   public static void main(String[] args)
       throws IOException, FailedToStartException, InterruptedException {
-    TestApp listener = new TestApp();
-
     if (args.length != 3) {
       throw new IllegalArgumentException("Arguments: <connection string> <database> <collection>");
     }
@@ -105,7 +103,7 @@ public class TestApp implements MongoEventListener {
     String collection = args[2];
 
     TailerConfig tc = TailerConfig.builder()
-        .listener(listener)
+        .listener(new TestApp())
         .dryRun(false)
         .initialImport(false)
         .mongoConnectionString(connectionString)
