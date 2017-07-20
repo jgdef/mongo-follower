@@ -10,6 +10,11 @@
   <name>mongo-follower</name>
   <url>http://maven.apache.org</url>
 
+  <scm>
+    <connection>git@github.com:Traackr/mongo-follower.git</connection>
+    <url>https://github.com/Traackr/mongo-follower.git</url>
+  </scm>
+
   <licenses>
     <license>
       <name>MIT License</name>
