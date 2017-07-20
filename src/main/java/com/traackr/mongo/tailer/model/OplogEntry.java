@@ -46,6 +46,7 @@ public abstract class OplogEntry {
       case "d":
         return new Delete(doc);
       case "c":
+        return new Command(doc);
       case "n":
       case "db":
       default:
