@@ -11,29 +11,6 @@ A simple, robust and flexible interface for streaming document events out of Mon
 * **Runner harness**. The `Runner` utilities make setting up a follower a breeze.
 
 
-## Options
-
-| property name | builderOption / type | default value | description |
-| ------------- | ---- | ------------- | ----------- |
-| n/a | listener / MongoEventListener | --- | A class extending the `MongoEventListener` interface to process events. |
-| initial-import | initialImport / Boolean | false | Toggle whether or not an initial import should be performed. |
-| oplog-file | oplogFile / String | --- | The absolute path to the oplog file, this needs to be accessible for reading and writing by the user running MongoFollower. |
-| mongo.oplog-delay | mongoConnectionString / String | --- | Standard MongoDB connection string. |
-| mongo.database | mongoDatabase / String | --- | Database containing the collection to be followed. |
-| mongo.collection | mongoCollection / String | --- | Collection being followed. |
-| mongo.oplog-delay | oplogDelayMinutes / int | 10 | Number of minutes to lag behind the oplog. By delaying the oplog you can restart your process without missing any events. Note that this expects that it is ok to send the same event multiple times as long as they are sent in order. |
-| mongo.oplog-interval | oplogUpdateIntervalMinutes / int | 10 | The number of minutes to wait between updating the oplog timestamp file. |
-| queue-size | queue / BlockingQueue<Record> | ArrayBlockingQueue<>(4000) | Optionally override the queue implementation with something custom or with a different capacity. |
-
-
-## Use cases
-
-- Event monitoring / auditing: setting a certain field indicates a document `merge` for your business
-- Synchronizing databases: Re-index to elasticsearch each time a document changes
-- Migration / Backup: map documents to Postgres, MySQL, Cassandra, CSV
-- Performance auditing: Detect inefficient usage patterns, such as many small frequent updates to a document instead of one larger update.
-
-
 ## How it works
 The mongo follower is a two step process to efficiently export data from a collection then keep it synchronized.
 
@@ -64,6 +41,29 @@ Alternatively a property file can be used to make it easier to switch between de
 
     Runner.run(props, new MyListener());
 ```
+
+
+## Options
+
+| property name | builderOption / type | default value | description |
+| ------------- | ---- | ------------- | ----------- |
+| n/a | listener / MongoEventListener | --- | A class extending the `MongoEventListener` interface to process events. |
+| initial-import | initialImport / Boolean | false | Toggle whether or not an initial import should be performed. |
+| oplog-file | oplogFile / String | --- | The absolute path to the oplog file, this needs to be accessible for reading and writing by the user running MongoFollower. |
+| mongo.oplog-delay | mongoConnectionString / String | --- | Standard MongoDB connection string. |
+| mongo.database | mongoDatabase / String | --- | Database containing the collection to be followed. |
+| mongo.collection | mongoCollection / String | --- | Collection being followed. |
+| mongo.oplog-delay | oplogDelayMinutes / int | 10 | Number of minutes to lag behind the oplog. By delaying the oplog you can restart your process without missing any events. Note that this expects that it is ok to send the same event multiple times as long as they are sent in order. |
+| mongo.oplog-interval | oplogUpdateIntervalMinutes / int | 10 | The number of minutes to wait between updating the oplog timestamp file. |
+| queue-size | queue / BlockingQueue<Record> | ArrayBlockingQueue<>(4000) | Optionally override the queue implementation with something custom or with a different capacity. |
+
+
+## Use cases
+
+- Event monitoring / auditing: setting a certain field indicates a document `merge` for your business
+- Synchronizing databases: Re-index to elasticsearch each time a document changes
+- Migration / Backup: map documents to Postgres, MySQL, Cassandra, CSV
+- Performance auditing: Detect inefficient usage patterns, such as many small frequent updates to a document instead of one larger update.
 
 
 ## Example
