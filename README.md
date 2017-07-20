@@ -20,7 +20,7 @@ MongoFollower is a two step process to efficiently export data from a collection
 The interface is driven by extending the `MongoEventListener` and providing an instance of the listener to the `Runner` utility.
 ```java
 
-    TailerConfig tc = TailerConfig.builder()
+    FollowerConfig tc = FollowerConfig.builder()
         .listener(new MyListener())
         .dryRun(false)
         .initialImport(false)
@@ -79,7 +79,7 @@ import com.traackr.mongo.follower.interfaces.MongoEventListener;
 import com.traackr.mongo.follower.model.Command;
 import com.traackr.mongo.follower.model.Delete;
 import com.traackr.mongo.follower.model.Insert;
-import com.traackr.mongo.follower.model.TailerConfig;
+import com.traackr.mongo.follower.model.FollowerConfig;
 import com.traackr.mongo.follower.model.Update;
 import com.traackr.mongo.follower.service.Runner;
 
@@ -102,7 +102,7 @@ public class TestApp implements MongoEventListener {
     String database = args[1];
     String collection = args[2];
 
-    TailerConfig tc = TailerConfig.builder()
+    FollowerConfig tc = FollowerConfig.builder()
         .listener(new TestApp())
         .dryRun(false)
         .initialImport(false)
