@@ -34,9 +34,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author wwinder
@@ -107,9 +106,7 @@ public class Runner {
       MongoReader oplogTailer,
       OpLogProcessor oplogProcessor,
       OplogTimestampWriter oplogWriter) {
-    final ThreadPoolExecutor pool = new ThreadPoolExecutor(4, 4,
-        0L, TimeUnit.MILLISECONDS,
-        new LinkedBlockingQueue<Runnable>());
+    final ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
 
     pool.submit(oplogTailer);
     pool.submit(oplogProcessor);
