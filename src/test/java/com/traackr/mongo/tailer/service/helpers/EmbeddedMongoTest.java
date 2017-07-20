@@ -13,7 +13,7 @@
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
 
-package com.traackr.mongo.tailer.service.test_helpers;
+package com.traackr.mongo.tailer.service.helpers;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 
 /**
