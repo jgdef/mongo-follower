@@ -1,18 +1,18 @@
 /**
  * MIT License
- *  
+ *
  * Copyright (c) 2017 Traackr, Inc
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,8 +36,9 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Tails the oplog dumping each record into a blocking queue for another thread
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * Created on: 5/25/16
  */
 public class MongoReader implements Runnable {
-  private static final Logger logger = LoggerFactory.getLogger(MongoReader.class);
+  private static final Logger logger = Logger.getLogger(MongoReader.class.getName());
 
   final private OpLogTailerParams params;
   private MongoClient client;
@@ -110,7 +111,7 @@ public class MongoReader implements Runnable {
           InitialImporter importer = new InitialImporter(params.queue, collection);
           importer.doImport();
         } catch (Exception e) {
-          logger.error("Exception during initial import!", e);
+          logger.log(Level.SEVERE, "Exception during initial import!", e);
           System.exit(1);
         }
         logger.info("Initial import complete!");
@@ -123,7 +124,7 @@ public class MongoReader implements Runnable {
           logger.info("Creating a new oplog cursor.");
           process(getNewCursor());
         } catch (Exception e) {
-          logger.error("Error while processing oplog cursor.", e);
+          logger.log(Level.SEVERE, "Error while processing oplog cursor.", e);
         }
 
         try {
@@ -131,11 +132,11 @@ public class MongoReader implements Runnable {
             Thread.sleep(1000);
           }
         } catch (InterruptedException e) {
-          logger.error("Oplog tailer interrupted...", e);
+          logger.log(Level.SEVERE, "Oplog tailer interrupted...", e);
         }
       }
     } finally {
-      logger.error("OpLogTailer thread is terminating.");
+      logger.severe("OpLogTailer thread is terminating.");
       client.close();
     }
   }
@@ -158,7 +159,7 @@ public class MongoReader implements Runnable {
             params.queue.put(new Record(OplogEntry.of(d)));
             put = true;
           } catch (InterruptedException e) {
-            logger.error("Interrupted while saving data to output queue.", e);
+            logger.log(Level.SEVERE, "Interrupted while saving data to output queue.", e);
           }
         }
       }

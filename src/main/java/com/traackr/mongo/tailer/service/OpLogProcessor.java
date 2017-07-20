@@ -1,18 +1,18 @@
 /**
  * MIT License
- *  
+ *
  * Copyright (c) 2017 Traackr, Inc
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,10 +29,10 @@ import com.traackr.mongo.tailer.model.OplogEntry;
 import com.traackr.mongo.tailer.model.Record;
 
 import org.bson.types.BSONTimestamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Process OplogEntry objects from a queue and send them to elasticsearch.
@@ -41,7 +41,7 @@ import java.util.concurrent.BlockingQueue;
  * Created on: 5/25/16
  */
 public class OpLogProcessor implements Runnable {
-  private static final Logger logger = LoggerFactory.getLogger(OpLogProcessor.class);
+  private static final Logger logger = Logger.getLogger(OpLogProcessor.class.getName());
 
   private final GlobalParams globals;
   private final BlockingQueue<Record> recordQueue;
@@ -67,7 +67,7 @@ public class OpLogProcessor implements Runnable {
         try {
           record = recordQueue.take();
         } catch (InterruptedException e) {
-          logger.error("Exception while taking an op log document.", e);
+          logger.log(Level.SEVERE, "Exception while taking an op log document.", e);
         }
 
         if (record != null) {
@@ -93,7 +93,7 @@ public class OpLogProcessor implements Runnable {
 
       logger.info("OpLogProcessor is shutting down.");
     } catch (Exception e) {
-      logger.error("A fatal exception occurred in the OpLogProcessor.", e);
+      logger.log(Level.SEVERE, "A fatal exception occurred in the OpLogProcessor.", e);
     }
   }
 
@@ -108,7 +108,7 @@ public class OpLogProcessor implements Runnable {
       try {
         oplogEventListener.dispatch(entry);
       } catch (Exception e) {
-        logger.error("Problem processing entry: {}", entry, e);
+        logger.log(Level.SEVERE, "Problem processing entry: " + entry, e);
         return false;
       }
     }

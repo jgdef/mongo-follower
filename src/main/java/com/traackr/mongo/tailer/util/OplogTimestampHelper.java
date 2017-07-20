@@ -1,18 +1,18 @@
 /**
  * MIT License
- *  
+ *
  * Copyright (c) 2017 Traackr, Inc
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,19 +24,19 @@
 package com.traackr.mongo.tailer.util;
 
 import org.bson.types.BSONTimestamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author wwinder
  *         Created on: 6/17/16
  */
 public class OplogTimestampHelper {
-  private static final Logger logger = LoggerFactory.getLogger(OplogTimestampHelper.class);
+  private static final Logger logger = Logger.getLogger(OplogTimestampHelper.class.getName());
 
   private static Path OPLOG_FILE = null;
 
@@ -74,12 +74,12 @@ public class OplogTimestampHelper {
     } catch (Exception e) {
       // This probably happened when manually recovering the oplog timestamp.
       if (fileDataExists) {
-        logger.error("Invalid oplog timestamp!", e);
+        logger.log(Level.SEVERE, "Invalid oplog timestamp!", e);
         System.exit(-1);
       }
 
       // Unable to get an existing oplog.
-      logger.error("Unable to find a valid timestamp in '"
+      logger.log(Level.SEVERE, "Unable to find a valid timestamp in '"
           + OPLOG_FILE.toAbsolutePath() + "', if this isn't the " +
           "first run that might be a problem.", e);
     }
