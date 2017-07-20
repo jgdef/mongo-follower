@@ -69,13 +69,13 @@ public class OpLogProcessor implements Runnable {
 
           // Oplog tail
           else if (record.oplogEntry != null) {
-            OplogEntry doc = record.oplogEntry;
+            OplogEntry entry = record.oplogEntry;
 
             // Process the document, manage oplog timestamp on success.
-            BSONTimestamp oplogTime = doc.getTimestamp();
+            BSONTimestamp oplogTime = entry.getTimestamp();
 
-            if (processEntry(doc)) {
-              globals.oplogTime = doc.getTimestamp();
+            if (processEntry(entry)) {
+              globals.oplogTime = entry.getTimestamp();
             }
           }
         }
