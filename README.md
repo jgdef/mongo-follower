@@ -74,14 +74,14 @@ java -jar TestApp.jar mongodb://localhost:27017 test_database test_collection
 ```
 
 ```java
-import com.traackr.mongo.tailer.exceptions.FailedToStartException;
-import com.traackr.mongo.tailer.interfaces.MongoEventListener;
-import com.traackr.mongo.tailer.model.Command;
-import com.traackr.mongo.tailer.model.Delete;
-import com.traackr.mongo.tailer.model.Insert;
-import com.traackr.mongo.tailer.model.TailerConfig;
-import com.traackr.mongo.tailer.model.Update;
-import com.traackr.mongo.tailer.service.Runner;
+import com.traackr.mongo.follower.exceptions.FailedToStartException;
+import com.traackr.mongo.follower.interfaces.MongoEventListener;
+import com.traackr.mongo.follower.model.Command;
+import com.traackr.mongo.follower.model.Delete;
+import com.traackr.mongo.follower.model.Insert;
+import com.traackr.mongo.follower.model.TailerConfig;
+import com.traackr.mongo.follower.model.Update;
+import com.traackr.mongo.follower.service.Runner;
 
 import org.bson.Document;
 
