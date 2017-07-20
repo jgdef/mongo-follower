@@ -1,5 +1,5 @@
 /**
- * MongoConnector.java - Traackr, Inc.
+ * TestConstants.java - Traackr, Inc.
  *
  * This document set is the property of Traackr, Inc., a Massachusetts
  * Corporation, and contains confidential and trade secret information. It
@@ -12,22 +12,15 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
-package com.traackr.mongo.tailer.service;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+package com.traackr.mongo.tailer.service.helpers;
+
+import de.flapdoodle.embed.mongo.distribution.Version;
 
 /**
  * @author wwinder
- *         Created on: 5/25/16
+ * Created on: 7/19/17
  */
-public class MongoConnector {
-  private final String uri;
-  public MongoConnector(String uri) {
-    this.uri = uri;
-  }
-
-  public MongoClient getClient() throws Exception {
-    return new MongoClient(new MongoClientURI(uri));
-  }
+public class TestConstants {
+  public final static Version.Main EMBEDDED_MONGO_VERSION = Version.Main.V3_5;
 }
