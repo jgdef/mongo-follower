@@ -22,6 +22,7 @@ import com.traackr.mongo.tailer.model.Record;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -57,7 +58,7 @@ public class MongoReader implements Runnable {
   private MongoCursor<Document> getNewCursor() throws Exception {
     logger.info("Getting oplog cursor for oplog time: " + params.globals.oplogTime.toString());
 
-    client = params.connector.getClient();
+    client = new MongoClient(new MongoClientURI(params.getConnectionString()));
     // Get the oplog.
     MongoDatabase db = client.getDatabase("local");
     MongoCollection<Document> coll = db.getCollection("oplog.rs");
@@ -95,7 +96,7 @@ public class MongoReader implements Runnable {
         // Perform initial import
         logger.info("Starting initial import!");
         try {
-          MongoClient client = params.connector.getClient();
+          MongoClient client = new MongoClient(new MongoClientURI(params.getConnectionString()));
           MongoCollection<Document> collection =
               client.getDatabase(params.database).getCollection(params.collection);
           InitialImporter importer = new InitialImporter(params.queue, collection);

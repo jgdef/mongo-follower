@@ -18,6 +18,7 @@ package com.traackr.mongo.tailer.service;
 import com.traackr.mongo.tailer.model.Record;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.ServerCursor;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -59,7 +60,7 @@ public class InitialImporter {
       }
 
       try {
-        if (queue.offer(new Record(cursor.next()), 5, TimeUnit.SECONDS)) {
+        if (queue.offer(new Record(cur), 5, TimeUnit.SECONDS)) {
           // Clear out current document.
           cur = null;
         } else {
@@ -84,11 +85,14 @@ public class InitialImporter {
           .noCursorTimeout(true);
       cursor = results.iterator();
 
-      // TODO: Persist cursor ID somewhere to allow restarts.
-      this.cursorId = cursor.getServerCursor().getId();
+      ServerCursor serverCursor = cursor.getServerCursor();
+      if (serverCursor != null) {
+        // TODO: Persist cursor ID somewhere to allow restarts.
+        this.cursorId = serverCursor.getId();
+      }
     }
     else if (cursor == null && cursorId != 0) {
-      // TODO: Lookup cursor ID for resume.
+      // TODO: Lookup server cursor ID for resume.
       // Open existing cursor in case of restart??
       new Throwable().printStackTrace();
     }

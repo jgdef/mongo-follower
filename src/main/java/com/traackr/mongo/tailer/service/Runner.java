@@ -42,12 +42,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Runner {
   public static void run(TailerConfig config) throws FailedToStartException {
-    ArrayBlockingQueue<Record> queue = new ArrayBlockingQueue<>(config.getQueueSize());
-
     // Initialize oplog dir.
-    String oplog = config.getOplogFile();
-    Path parentDirectory = Paths.get(oplog).getParent();
     try {
+      Path parentDirectory = Paths.get(config.getOplogFile()).getParent();
       Files.createDirectories(parentDirectory);
     }
     catch (IOException ioe) {
@@ -58,38 +55,31 @@ public class Runner {
     GlobalParams globalParams = new GlobalParams(
         config.getDryRun(),
         new KillSwitch(),
-        getOplogTimestamp(oplog),
+        getOplogTimestamp(config.getOplogFile()),
         null,
         false
     );
 
     // Mongo properties
-    String mongoConnectionString = config.getMongoConnectionString();
     OpLogTailerParams mongoParams = null;
-    try {
-      MongoConnector mc = new MongoConnector(mongoConnectionString);
       mongoParams = OpLogTailerParams.with(
           globalParams,
           config.getInitialImport(),
-          queue,
-          mc,
+          config.getQueue(),
+          config.getMongoConnectionString(),
           config.getMongoDatabase(),
           config.getMongoCollection());
-    } catch (Exception e) {
-      throw new FailedToStartException("Problem initializing mongo properties.", e);
-    }
 
     // Initialize OpLogTail
     MongoReader oplogTailer = new MongoReader(mongoParams);
 
     // Initialize OpLogProcessor
-    OpLogProcessor oplogProcessor = new OpLogProcessor(globalParams, queue, config.getListener());
+    OpLogProcessor oplogProcessor = new OpLogProcessor(globalParams, config.getQueue(), config.getListener());
 
     ///////////////////
     // Start threads //
     ///////////////////
-    launchThreads(queue, oplogTailer, oplogProcessor);
-
+    launchThreads(config.getQueue(), oplogTailer, oplogProcessor);
   }
 
   private static void launchThreads(
@@ -134,15 +124,20 @@ public class Runner {
    * mongo.collection
    */
   public static void run(Properties properties, MongoEventListener listener) throws FailedToStartException {
-    TailerConfig config = TailerConfig.builder()
-        .listener(listener)
-        .dryRun(Boolean.valueOf(properties.getProperty("dry-run")))
-        .oplogFile(properties.getProperty("oplog-file"))
-        .initialImport(Boolean.valueOf(properties.getProperty("initial-import")))
-        .mongoConnectionString(properties.getProperty("mongo.connection-string"))
-        .mongoDatabase(properties.getProperty("mongo.database"))
-        .mongoDatabase(properties.getProperty("mongo.collection"))
-        .build();
-    run(config);
+    try {
+      TailerConfig config = TailerConfig.builder()
+          .listener(listener)
+          .queue(new ArrayBlockingQueue<>(Integer.valueOf(properties.getProperty("queue-size"))))
+          .dryRun(Boolean.valueOf(properties.getProperty("dry-run")))
+          .oplogFile(properties.getProperty("oplog-file"))
+          .initialImport(Boolean.valueOf(properties.getProperty("initial-import")))
+          .mongoConnectionString(properties.getProperty("mongo.connection-string"))
+          .mongoDatabase(properties.getProperty("mongo.database"))
+          .mongoCollection(properties.getProperty("mongo.collection"))
+          .build();
+      run(config);
+    } catch (Exception e) {
+      throw new FailedToStartException("Problem initializing configuration.", e);
+    }
   }
 }
