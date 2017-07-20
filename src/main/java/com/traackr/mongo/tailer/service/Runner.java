@@ -27,6 +27,7 @@ import com.traackr.mongo.tailer.util.KillSwitch;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -38,17 +39,28 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author wwinder
- *         Created on: 7/18/17
+ * Created on: 7/18/17
  */
 public class Runner {
   public static void run(TailerConfig config) throws FailedToStartException {
     // Initialize oplog dir.
     try {
-      Path parentDirectory = Paths.get(config.getOplogFile()).getParent();
-      Files.createDirectories(parentDirectory);
-    }
-    catch (IOException ioe) {
-      throw new FailedToStartException("Failed to find or create oplog file.", ioe);
+      Path oplogFilePath = Paths.get(config.getOplogFile());
+      Path parentDirectory = oplogFilePath.getParent();
+      if (parentDirectory == null) {
+        throw new FailedToStartException(
+            String.format("Could not find containing directory for oplog file %s",
+                config.getOplogFile()));
+      }
+      if (!Files.exists(parentDirectory)) {
+        Files.createDirectories(parentDirectory);
+      }
+    } catch (InvalidPathException ipe) {
+      throw new FailedToStartException(
+          String.format("Invalid path given for oplog file: %s", config.getOplogFile()),
+          ipe);
+    } catch (IOException ioe) {
+      throw new FailedToStartException("Failed to create oplog file directory", ioe);
     }
 
     // Global properties.
@@ -62,19 +74,20 @@ public class Runner {
 
     // Mongo properties
     OpLogTailerParams mongoParams = null;
-      mongoParams = OpLogTailerParams.with(
-          globalParams,
-          config.getInitialImport(),
-          config.getQueue(),
-          config.getMongoConnectionString(),
-          config.getMongoDatabase(),
-          config.getMongoCollection());
+    mongoParams = OpLogTailerParams.with(
+        globalParams,
+        config.getInitialImport(),
+        config.getQueue(),
+        config.getMongoConnectionString(),
+        config.getMongoDatabase(),
+        config.getMongoCollection());
 
     // Initialize OpLogTail
     MongoReader oplogTailer = new MongoReader(mongoParams);
 
     // Initialize OpLogProcessor
-    OpLogProcessor oplogProcessor = new OpLogProcessor(globalParams, config.getQueue(), config.getListener());
+    OpLogProcessor oplogProcessor = new OpLogProcessor(
+        globalParams, config.getQueue(), config.getListener());
 
     ///////////////////
     // Start threads //
@@ -83,9 +96,9 @@ public class Runner {
   }
 
   private static void launchThreads(
-                             final BlockingQueue<Record> queue,
-                             MongoReader oplogTailer,
-                             OpLogProcessor oplogProcessor) {
+      final BlockingQueue<Record> queue,
+      MongoReader oplogTailer,
+      OpLogProcessor oplogProcessor) {
     final ThreadPoolExecutor pool = new ThreadPoolExecutor(3, 3,
         0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<Runnable>());
@@ -123,7 +136,8 @@ public class Runner {
    * mongo.database
    * mongo.collection
    */
-  public static void run(Properties properties, MongoEventListener listener) throws FailedToStartException {
+  public static void run(Properties properties, MongoEventListener listener)
+      throws FailedToStartException {
     try {
       TailerConfig config = TailerConfig.builder()
           .listener(listener)
