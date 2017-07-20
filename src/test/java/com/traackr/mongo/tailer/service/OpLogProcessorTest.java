@@ -37,7 +37,6 @@ public class OpLogProcessorTest {
   @Before
   public void setUp() throws Exception {
     globalParams = new GlobalParams(
-        true,
         new KillSwitch(),
         new BSONTimestamp(0, 0),
         0,

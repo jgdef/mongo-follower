@@ -52,7 +52,6 @@ public class MongoReaderOplogTailMongoTest {
 
   private static GlobalParams globalsAtTime(Date timestamp) {
     return new GlobalParams(
-        true,
         new KillSwitch(),
         new BSONTimestamp((int) (timestamp.getTime() / 1000), 0),
         0,

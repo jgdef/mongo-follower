@@ -66,7 +66,6 @@ public class Runner {
 
     // Global properties.
     GlobalParams globalParams = new GlobalParams(
-        config.getDryRun(),
         new KillSwitch(),
         getOplogTimestamp(config.getOplogFile()),
         config.getOplogDelayMinutes(),
@@ -148,7 +147,6 @@ public class Runner {
       TailerConfig config = TailerConfig.builder()
           .listener(listener)
           .queue(new ArrayBlockingQueue<>(Integer.valueOf(properties.getProperty("queue-size"))))
-          .dryRun(Boolean.valueOf(properties.getProperty("dry-run")))
           .oplogFile(properties.getProperty("oplog-file"))
           .oplogDelayMinutes(Integer.valueOf(properties.getProperty("mongo.oplog-delay")))
           .oplogUpdateIntervalMinutes(

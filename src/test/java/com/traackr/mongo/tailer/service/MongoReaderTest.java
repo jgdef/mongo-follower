@@ -48,7 +48,6 @@ public class MongoReaderTest {
     em = EmbeddedMongo.replicaSetStartMongo(Version.Main.V3_4);
 
     globalParams = new GlobalParams(
-        true,
         new KillSwitch(),
         new BSONTimestamp(0, 0),
         0,

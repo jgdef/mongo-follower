@@ -66,13 +66,6 @@ public class TailerConfig {
   String oplogFile;
 
   /**
-   * ???
-   */
-  @NonNull
-  @Builder.Default
-  Boolean dryRun = true;
-
-  /**
    * Mongo connection string.
    */
   @NonNull

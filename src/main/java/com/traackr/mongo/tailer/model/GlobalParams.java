@@ -26,9 +26,8 @@ import lombok.Data;
  */
 @Data
 public class GlobalParams {
-  public GlobalParams(Boolean dryRun, KillSwitch running, BSONTimestamp oplogTime,
+  public GlobalParams(KillSwitch running, BSONTimestamp oplogTime,
                       int oplogDelay, int oplogInterval, String dateFormat, Boolean longToString) {
-    this.dryRun = dryRun;
     this.running = running;
     this.oplogTime = oplogTime;
     this.oplogDelay = oplogDelay;
@@ -37,7 +36,6 @@ public class GlobalParams {
     this.longToString = longToString;
   }
 
-  public Boolean dryRun;
   public KillSwitch running;
   public BSONTimestamp oplogTime;
   public Integer oplogDelay;
