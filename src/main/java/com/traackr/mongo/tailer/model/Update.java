@@ -13,7 +13,7 @@ import java.util.Map;
  * Created on: 7/19/17
  */
 public class Update extends OplogEntry {
-  enum UpdateType {
+  public enum UpdateType {
     /**
      * Replace specified fields with new values
      */
