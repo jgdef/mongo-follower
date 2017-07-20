@@ -40,6 +40,8 @@ public class OpLogProcessorTest {
         true,
         new KillSwitch(),
         new BSONTimestamp(0, 0),
+        0,
+        0,
         "yyyy-MM-dd'T'HH:mm:ss",
         true);
     queue = new ArrayBlockingQueue<>(4000);

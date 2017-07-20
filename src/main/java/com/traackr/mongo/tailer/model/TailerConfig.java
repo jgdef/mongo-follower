@@ -32,6 +32,21 @@ import lombok.NonNull;
 @Builder
 public class TailerConfig {
   /**
+   * How many minutes to lag behind the oplog to allow for overlapping events in case of restart
+   * instead of lost events.
+   */
+  @NonNull
+  @Builder.Default
+  Integer oplogDelayMinutes = 10;
+
+  /**
+   * How frequently to update the oplog.
+   */
+  @NonNull
+  @Builder.Default
+  Integer oplogUpdateIntervalMinutes = 10;
+
+  /**
    * The thread-safe queue to use.
    */
   @NonNull
