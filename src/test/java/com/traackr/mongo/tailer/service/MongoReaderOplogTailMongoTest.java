@@ -54,7 +54,7 @@ public class MongoReaderOplogTailMongoTest {
     return new GlobalParams(
         true,
         new KillSwitch(),
-        new BSONTimestamp((int)(timestamp.getTime() / 1000), 0),
+        new BSONTimestamp((int) (timestamp.getTime() / 1000), 0),
         "yyyy-MM-dd'T'HH:mm:ss",
         true);
   }
@@ -80,7 +80,7 @@ public class MongoReaderOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNull(record.importLine));
+    spyQueue.stream().forEach(record -> Assert.assertNull(record.importDocument));
   }
 
   @Test
@@ -107,7 +107,7 @@ public class MongoReaderOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNotNull(record.importLine));
+    spyQueue.stream().forEach(record -> Assert.assertNotNull(record.importDocument));
   }
 
   @Test
@@ -134,9 +134,9 @@ public class MongoReaderOplogTailMongoTest {
     int i = 0;
     while (spyQueue.size() > 0) {
       if (i < 100) {
-        Assert.assertNotNull(spyQueue.take().importLine);
+        Assert.assertNotNull(spyQueue.take().importDocument);
       } else {
-        Assert.assertNull(spyQueue.take().importLine);
+        Assert.assertNull(spyQueue.take().importDocument);
       }
       i++;
     }
@@ -166,6 +166,6 @@ public class MongoReaderOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNull(record.importLine));
+    spyQueue.stream().forEach(record -> Assert.assertNull(record.importDocument));
   }
 }
