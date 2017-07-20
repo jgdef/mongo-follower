@@ -19,107 +19,58 @@ import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.bson.types.BSONTimestamp;
 
-import java.util.Arrays;
-
 /**
  * @author wwinder
  * Created on: 5/27/16
  */
-public class OplogEntry {
-  private final Document document;
-  private final String id;
+public abstract class OplogEntry {
+  private final Document rawEntry;
   private final BSONTimestamp timestamp;
-  private final Operation operation;
   private final String namespace;
-  private final Document updateSpec;
-  private final Document query;
-  private boolean isWholesaleUpdate = false;
 
-  public OplogEntry(Document doc) {
-    this.document = doc;
+  OplogEntry(Document doc) {
+    this.rawEntry = doc;
 
-    BsonTimestamp ts = (BsonTimestamp) doc.get("ts");
-    timestamp = new BSONTimestamp(ts.getTime(), ts.getInc());
-    operation = Operation.getOpFor((String) doc.get("op"));
-    namespace = (String) doc.get("ns");
-    query = (Document) doc.get("o2");
-    updateSpec = (Document) doc.get("o");
+    BsonTimestamp ts = doc.get("ts", BsonTimestamp.class);
+    this.timestamp = new BSONTimestamp(ts.getTime(), ts.getInc());
+    this.namespace = doc.getString("ns");
+  }
 
+  public static OplogEntry of(final Document doc) {
+    final String operation = doc.getString("op");
     switch (operation) {
-      case DELETE:
-      case INSERT:
-        id = (String) updateSpec.get("_id");
-        break;
-      case UPDATE:
-        if (isWholesaleUpdate(updateSpec)) {
-          isWholesaleUpdate = true;
-        }
-        id = (String) query.get("_id");
-        break;
+      case "i":
+        return new Insert(doc);
+      case "u":
+        return new Update(doc);
+      case "d":
+        return new Delete(doc);
+      case "c":
+        return new Command(doc);
+      case "n":
+      case "db":
       default:
-        id = "";
-        break;
+        return new Unhandled(doc);
     }
   }
 
-  public Document getDocument() {
-    return document;
-  }
-
-  public String getId() {
-    return id;
+  public Document getRawEntry() {
+    return rawEntry;
   }
 
   public BSONTimestamp getTimestamp() {
     return timestamp;
   }
 
-  public Operation getOperation() {
-    return operation;
-  }
-
   public String getNamespace() {
     return namespace;
   }
 
-  public Document getQuery() {
-    return query;
-  }
+  public abstract String getId();
 
-  public Document getUpdate() {
-    return updateSpec;
-  }
-
-  public boolean isWholesaleUpdate() {
-    return isWholesaleUpdate;
-  }
-
-  public enum Operation {
-    INSERT("i"),
-    DELETE("d"),
-    UPDATE("u"),
-    COMMAND("c"),
-    NOOP("n");
-
-    final public String code;
-
-    Operation(String code) {
-      this.code = code;
-    }
-
-    public static Operation getOpFor(String code) {
-      return Arrays.stream(Operation.values())
-          .filter(operator -> operator.code.equalsIgnoreCase(code))
-          .findFirst()
-          .orElse(null);
-    }
-  }
-
-  /**
-   * Check if the operation is an update replacing the entire document.
-   */
-  private static boolean isWholesaleUpdate(final Document doc) {
-    return !doc.containsKey("$set") && !doc.containsKey("$unset");
+  @Override
+  public String toString() {
+    return String.format("%s(id=%s)", this.getClass().getSimpleName(), this.getId());
   }
 }
 

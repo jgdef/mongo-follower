@@ -1,14 +1,18 @@
 package com.traackr.mongo.tailer.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
+import com.traackr.mongo.tailer.model.Delete;
 import com.traackr.mongo.tailer.model.GlobalParams;
+import com.traackr.mongo.tailer.model.Insert;
 import com.traackr.mongo.tailer.model.OplogEntry;
 import com.traackr.mongo.tailer.model.Record;
+import com.traackr.mongo.tailer.model.Update;
 import com.traackr.mongo.tailer.util.KillSwitch;
 
-import org.bson.Document;
+import org.assertj.core.api.Assertions;
 import org.bson.types.BSONTimestamp;
 import org.junit.After;
 import org.junit.Assert;
@@ -40,6 +44,7 @@ public class OpLogProcessorTest {
         true);
     queue = new ArrayBlockingQueue<>(4000);
     eventListener = Mockito.mock(MongoEventListener.class);
+    Mockito.doCallRealMethod().when(eventListener).dispatch(any(OplogEntry.class));
   }
 
   @After
@@ -49,9 +54,9 @@ public class OpLogProcessorTest {
 
   @Test
   public void testProcessQueue() throws Exception {
-    queue.add(new Record(new OplogEntry(OplogEntryTest.getOplogInsert())));
-    queue.add(new Record(new OplogEntry(OplogEntryTest.getOplogWholesaleUpdate())));
-    queue.add(new Record(new OplogEntry(OplogEntryTest.getOplogDelete())));
+    queue.add(new Record(OplogEntry.of(OplogEntryTest.getOplogInsert())));
+    queue.add(new Record(OplogEntry.of(OplogEntryTest.getOplogWholesaleUpdate())));
+    queue.add(new Record(OplogEntry.of(OplogEntryTest.getOplogDelete())));
 
     OpLogProcessor olp = new OpLogProcessor(globalParams, queue, eventListener);
 
@@ -76,26 +81,25 @@ public class OpLogProcessorTest {
 
     Assert.assertTrue(future.isDone());
 
-    // Verify the data passed to the index service.
-    ArgumentCaptor<Document> insertDoc = ArgumentCaptor.forClass(Document.class);
-    ArgumentCaptor<OplogEntry> insertOp = ArgumentCaptor.forClass(OplogEntry.class);
-    ArgumentCaptor<Boolean> updateBool = ArgumentCaptor.forClass(Boolean.class);
-    ArgumentCaptor<OplogEntry> updateOp = ArgumentCaptor.forClass(OplogEntry.class);
+    // Verify the data passed to the listener
+    ArgumentCaptor<Insert> insertOp = ArgumentCaptor.forClass(Insert.class);
+    ArgumentCaptor<Update> updateOp = ArgumentCaptor.forClass(Update.class);
 
-    Mockito.verify(eventListener, times(1)).insert(insertDoc.capture(), insertOp.capture());
-    Mockito.verify(eventListener, times(1)).update(updateBool.capture(), updateOp.capture());
+    Mockito.verify(eventListener, times(1)).insert(insertOp.capture());
+    Mockito.verify(eventListener, times(1)).update(updateOp.capture());
 
-    ArgumentCaptor<OplogEntry> deleteOp = ArgumentCaptor.forClass(OplogEntry.class);
-    Mockito.verify(eventListener, times(1)).delete(Mockito.eq(OplogEntryTest.id), deleteOp.capture());
+    ArgumentCaptor<Delete> deleteOp = ArgumentCaptor.forClass(Delete.class);
+    Mockito.verify(eventListener, times(1)).delete(deleteOp.capture());
 
-    Document d = insertDoc.getAllValues().get(0);
-    Assert.assertTrue(d.containsKey("_id"));
-    Assert.assertEquals(OplogEntryTest.id, d.get("_id"));
-    Assert.assertEquals(3, d.size());
+    final Insert i = insertOp.getValue();
+    Assertions.assertThat(i.getId()).isEqualTo(OplogEntryTest.id);
+    Assertions.assertThat(i.getDocument()).hasSize(3);
 
-    d = updateOp.getAllValues().get(0).getUpdate();
-    Assert.assertTrue(d.containsKey("_id"));
-    Assert.assertEquals(OplogEntryTest.id, d.get("_id"));
-    Assert.assertEquals(3, d.size());
+    final Update u = updateOp.getValue();
+    Assertions.assertThat(u.getId()).isEqualTo(OplogEntryTest.id);
+    Assertions.assertThat(u.getDocument()).hasSize(3);
+
+    final Delete d = deleteOp.getValue();
+    Assertions.assertThat(d.getId()).isEqualTo(OplogEntryTest.id);
   }
 }

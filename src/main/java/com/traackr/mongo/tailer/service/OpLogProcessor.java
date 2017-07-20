@@ -12,6 +12,7 @@
  *
  * Copyright 2012-2015 Traackr, Inc. All Rights Reserved.
  */
+
 package com.traackr.mongo.tailer.service;
 
 import com.traackr.mongo.tailer.interfaces.MongoEventListener;
@@ -29,7 +30,7 @@ import java.util.concurrent.BlockingQueue;
  * Process OplogEntry objects from a queue and send them to elasticsearch.
  *
  * @author wwinder
- *         Created on: 5/25/16
+ * Created on: 5/25/16
  */
 public class OpLogProcessor implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(OpLogProcessor.class);
@@ -38,9 +39,10 @@ public class OpLogProcessor implements Runnable {
   private final BlockingQueue<Record> recordQueue;
   private final MongoEventListener oplogEventListener;
 
-  public OpLogProcessor(GlobalParams globals,
-                        BlockingQueue<Record> recordQueue,
-                        MongoEventListener oplogEventListener) {
+  public OpLogProcessor(
+      GlobalParams globals,
+      BlockingQueue<Record> recordQueue,
+      MongoEventListener oplogEventListener) {
     this.globals = globals;
     this.recordQueue = recordQueue;
     this.oplogEventListener = oplogEventListener;
@@ -91,30 +93,14 @@ public class OpLogProcessor implements Runnable {
    * Pass oplog entry to the listener
    *
    * @param entry
-   * @return whether event was passed/processed by the listener without Exception
+   * @return true if no Exception
    */
   private boolean processEntry(OplogEntry entry) {
-    while (entry != null) {
+    if (entry != null) {
       try {
-        switch (entry.getOperation()) {
-          case INSERT:
-            oplogEventListener.insert(entry.getUpdate(), entry);
-            break;
-          case DELETE:
-            oplogEventListener.delete(entry.getId(), entry);
-            break;
-          case UPDATE:
-              oplogEventListener.update(entry.isWholesaleUpdate(), entry);
-            break;
-          case COMMAND:
-            oplogEventListener.command(entry.getDocument(), entry);
-            break;
-          case NOOP:
-            break;
-        }
-        entry = null;
+        oplogEventListener.dispatch(entry);
       } catch (Exception e) {
-        logger.error("Problem indexing document: " + entry.getId(), e);
+        logger.error("Problem processing entry: {}", entry, e);
         return false;
       }
     }
