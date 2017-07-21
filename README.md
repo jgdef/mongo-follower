@@ -31,7 +31,6 @@ The interface is driven by extending the `MongoEventListener` and providing an i
 
     FollowerConfig tc = FollowerConfig.builder()
         .listener(new MyListener())
-        .dryRun(false)
         .initialImport(false)
         .mongoConnectionString(connectionString)
         .mongoDatabase(database)
