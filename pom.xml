@@ -7,22 +7,38 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>mongo-follower</name>
-  <url>http://maven.apache.org</url>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>A simple, robust and flexible interface for streaming document events out of MongoDB.</description>
+  <url>https://github.com/Traackr/mongo-follower</url>
 
   <scm>
-    <connection>git@github.com:Traackr/mongo-follower.git</connection>
-    <url>https://github.com/Traackr/mongo-follower.git</url>
+    <connection>scm:git:git@github.com:Traackr/mongo-follower.git</connection>
+    <developerConnection>scm:git:git@github.com:Traackr/mongo-follower.git</developerConnection>
+    <url>https://github.com/Traackr/mongo-follower/tree/master</url>
   </scm>
 
   <licenses>
     <license>
       <name>MIT License</name>
       <url>http://www.opensource.org/licenses/mit-license.php</url>
-      <distribution>repo</distribution>
-      <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <name>Will Winder</name>
+      <email>wwinder@traackr.com</email>
+      <organization>Traackr</organization>
+      <organizationUrl>http://www.traackr.com</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Michael McLellan</name>
+      <email>mmclellan@traackr.com</email>
+      <organization>Traackr</organization>
+      <organizationUrl>http://www.traackr.com</organizationUrl>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
