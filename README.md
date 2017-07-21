@@ -4,7 +4,7 @@ A simple, robust and flexible interface for streaming document events out of Mon
 
 
 ## Maven
-```java
+```xml
     <dependency>
       <groupId>com.traackr</groupId>
       <artifactId>mongo-follower</artifactId>
