@@ -3,6 +3,15 @@
 A simple, robust and flexible interface for streaming document events out of MongoDB.
 
 
+## Maven
+```java
+    <dependency>
+      <groupId>com.traackr</groupId>
+      <artifactId>mongo-follower</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+```
+
 ## Key features
 * **Resumable**. An oplog timestamp is maintained which allows for restarting `MongoFollower` to resume processing. The timestamp can be configured with:
   * `updateInterval`: control how often the file is updated.
