@@ -108,7 +108,7 @@ public class MongoFollower implements Runnable {
           MongoClient client = new MongoClient(new MongoClientURI(params.getConnectionString()));
           MongoCollection<Document> collection =
               client.getDatabase(params.database).getCollection(params.collection);
-          InitialImporter importer = new InitialImporter(params.queue, collection);
+          InitialExporter importer = new InitialExporter(params.queue, collection);
           importer.doImport();
         } catch (Exception e) {
           logger.log(Level.SEVERE, "Exception during initial import!", e);

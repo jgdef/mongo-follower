@@ -37,7 +37,7 @@ public class OpLogTailerParams {
   @NonNull
   public GlobalParams globals;
   @NonNull
-  public Boolean doImport;
+  public Boolean doExport;
   @NonNull
   public BlockingQueue<Record> queue;
   @NonNull

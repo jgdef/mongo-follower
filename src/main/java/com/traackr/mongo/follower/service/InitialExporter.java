@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * @author wwinder
  *         Created on: 12/14/16
  */
-public class InitialImporter {
+public class InitialExporter {
   private static final Logger logger = Logger.getLogger(OpLogProcessor.class.getName());
 
   private final MongoCollection<Document> collection;
@@ -50,7 +50,7 @@ public class InitialImporter {
   private long cursorId;
   private MongoCursor<Document> cursor;
 
-  public InitialImporter(BlockingQueue<Record> queue,
+  public InitialExporter(BlockingQueue<Record> queue,
                          MongoCollection<Document> collection) {
     this.queue = queue;
     this.collection = collection;
@@ -59,7 +59,7 @@ public class InitialImporter {
   /**
    * Processes the cursor until nothing is left, sending all the documents to
    */
-  public void doImport() {
+  public void doExport() {
     MongoCursor<Document> cursor = getCursor();
     Document cur = null;
     while(cur != null || cursor.hasNext()) {

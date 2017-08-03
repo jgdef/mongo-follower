@@ -92,10 +92,10 @@ public class FollowerConfig {
   String mongoCollection;
 
   /**
-   * Whether to do an initial import on the collection before oplog tailing.
+   * Whether to do an initial export on the collection before oplog tailing.
    * TODO: Default value.
    */
   @NonNull
   @Builder.Default
-  Boolean initialImport = false;
+  Boolean initialExport = false;
 }

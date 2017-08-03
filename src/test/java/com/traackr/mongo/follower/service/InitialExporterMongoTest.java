@@ -44,7 +44,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * @author wwinder
  * Created on: 7/19/17
  */
-public class InitialImporterMongoTest {
+public class InitialExporterMongoTest {
   EmbeddedMongo em;
 
   @Before
@@ -53,21 +53,21 @@ public class InitialImporterMongoTest {
   }
 
   @Test
-  public void emptyInitialImport() {
+  public void emptyInitialExport() {
     MongoClient client = em.getClient();
     MongoDatabase db = client.getDatabase("ii_test_db");
     MongoCollection col = db.getCollection("ii_test_collection");
 
     ArrayBlockingQueue<Record> queue = new ArrayBlockingQueue<>(2000);
 
-    InitialImporter ii = new InitialImporter(queue, col);
-    ii.doImport();
+    InitialExporter ii = new InitialExporter(queue, col);
+    ii.doExport();
 
     Assert.assertEquals(0, queue.size());
   }
 
   @Test
-  public void nonEmptyInitialImport() throws InterruptedException {
+  public void nonEmptyInitialExport() throws InterruptedException {
     MongoClient client = em.getClient();
     String database = "ii_test_db";
     String collection = "ii_test_collection";
@@ -75,13 +75,13 @@ public class InitialImporterMongoTest {
     MongoDatabase db = client.getDatabase(database);
     MongoCollection col = db.getCollection(collection);
 
-    // Add some documents to mongo / oplog for initial import.
+    // Add some documents to mongo / oplog for initial export.
     createDocuments(em, database, collection, 500, true);
 
     ArrayBlockingQueue<Record> queue = new ArrayBlockingQueue<Record>(2000);
 
-    InitialImporter ii = new InitialImporter(queue, col);
-    ii.doImport();
+    InitialExporter ii = new InitialExporter(queue, col);
+    ii.doExport();
 
     Assert.assertEquals(500, queue.size());
   }

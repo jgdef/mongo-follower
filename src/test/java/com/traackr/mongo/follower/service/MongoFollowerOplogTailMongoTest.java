@@ -70,7 +70,7 @@ public class MongoFollowerOplogTailMongoTest {
 
   @Test
   public void noActivityOplogTailOnlyTest() throws InterruptedException {
-    // These documents should be part of the oplog tailing, NOT the initial import.
+    // These documents should be part of the oplog tailing, NOT the initial export.
     createDocuments(em, DATABASE, COLLECTION, 100, true);
 
     OpLogTailerParams params = OpLogTailerParams.with(
@@ -89,12 +89,12 @@ public class MongoFollowerOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNull(record.importDocument));
+    spyQueue.stream().forEach(record -> Assert.assertNull(record.exportDocument));
   }
 
   @Test
-  public void noActivityOplogImportTest() throws InterruptedException {
-    // These documents should be part of the initial import.
+  public void noActivityOplogExportTest() throws InterruptedException {
+    // These documents should be part of the initial export.
     createDocuments(em, DATABASE, COLLECTION, 100, true);
 
     // Give mongo a chance to get them into the oplog
@@ -116,11 +116,11 @@ public class MongoFollowerOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNotNull(record.importDocument));
+    spyQueue.stream().forEach(record -> Assert.assertNotNull(record.exportDocument));
   }
 
   @Test
-  public void noActivityOplogImportWithOverlapTest() throws InterruptedException {
+  public void noActivityOplogExportWithOverlapTest() throws InterruptedException {
     OpLogTailerParams params = OpLogTailerParams.with(
         globalsAtTime(new Date()), // start at now
         true,
@@ -130,7 +130,7 @@ public class MongoFollowerOplogTailMongoTest {
         COLLECTION);
     MongoFollower follower = new MongoFollower(params);
 
-    // These documents will be part of the initial import and the oplog, technically thats ok.
+    // These documents will be part of the initial export and the oplog, technically thats ok.
     createDocuments(em, DATABASE, COLLECTION, 100, true);
 
     // Start oplog tailing.
@@ -143,9 +143,9 @@ public class MongoFollowerOplogTailMongoTest {
     int i = 0;
     while (spyQueue.size() > 0) {
       if (i < 100) {
-        Assert.assertNotNull(spyQueue.take().importDocument);
+        Assert.assertNotNull(spyQueue.take().exportDocument);
       } else {
-        Assert.assertNull(spyQueue.take().importDocument);
+        Assert.assertNull(spyQueue.take().exportDocument);
       }
       i++;
     }
@@ -175,6 +175,6 @@ public class MongoFollowerOplogTailMongoTest {
     Thread.sleep(5000);
 
     Assert.assertEquals(100, spyQueue.size());
-    spyQueue.stream().forEach(record -> Assert.assertNull(record.importDocument));
+    spyQueue.stream().forEach(record -> Assert.assertNull(record.exportDocument));
   }
 }

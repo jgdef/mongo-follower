@@ -72,9 +72,9 @@ public class OpLogProcessor implements Runnable {
 
         if (record != null) {
 
-          // Initial import
-          if (record.importDocument != null) {
-            oplogEventListener.importDocument(record.importDocument);
+          // Initial export
+          if (record.exportDocument != null) {
+            oplogEventListener.exportDocument(record.exportDocument);
           }
 
           // Oplog tail

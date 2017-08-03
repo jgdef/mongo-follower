@@ -16,14 +16,14 @@ A simple, robust and flexible interface for streaming document events out of Mon
 * **Resumable**. An oplog timestamp is maintained which allows for restarting `MongoFollower` to resume processing. The timestamp can be configured with:
   * `updateInterval`: control how often the file is updated.
   * `updateDelay`: subtracts some amount of time from the oplog so that oplog events aren't skipped during a restart.
-* **Initial import**. By starting the process with an initial import all documents can be exported effortlessly.
+* **Initial export**. By starting the process with an initial export all documents can be exported effortlessly.
 * **Runner harness**. The `Runner` utilities make setting up a follower a breeze.
 
 
 ## How it works
 MongoFollower is a two step process to efficiently export data from a collection then keep it synchronized.
 
-1. An initial export gets the bulk of your historic documents out of the collection. This can be disabled by setting `initialImport` to `false`.
+1. An initial export gets the bulk of your historic documents out of the collection. This can be disabled by setting `initialExport` to `false`.
 2. A MongoDB oplog tailing process is started which keeps processing events as they occur.
 
 The interface is driven by extending the `MongoEventListener` and providing an instance of the listener to the `Runner` utility.
@@ -31,7 +31,7 @@ The interface is driven by extending the `MongoEventListener` and providing an i
 
     FollowerConfig tc = FollowerConfig.builder()
         .listener(new MyListener())
-        .initialImport(false)
+        .initialExport(false)
         .mongoConnectionString(connectionString)
         .mongoDatabase(database)
         .mongoCollection(collection)
@@ -56,7 +56,7 @@ Alternatively a property file can be used to make it easier to switch between de
 | property name | builderOption / type | default value | description |
 | ------------- | ---- | ------------- | ----------- |
 | n/a | listener / MongoEventListener | --- | A class extending the `MongoEventListener` interface to process events. |
-| initial-import | initialImport / Boolean | false | Enabling this flag will cause MongoFollower to start the process by importing all existing documents from MongoDB into the event listener. |
+| initial-export | initialExport / Boolean | false | Enabling this flag will cause MongoFollower to start the process by exporting all existing documents from MongoDB into the event listener. |
 | oplog-file | oplogFile / String | --- | The absolute path to the oplog file, this needs to be accessible for reading and writing by the user running MongoFollower. |
 | mongo.oplog-delay | mongoConnectionString / String | --- | Standard MongoDB connection string. |
 | mongo.database | mongoDatabase / String | --- | Database containing the collection to be followed. |
@@ -113,7 +113,7 @@ public class TestApp implements MongoEventListener {
     FollowerConfig tc = FollowerConfig.builder()
         .listener(new TestApp())
         .dryRun(false)
-        .initialImport(false)
+        .initialExport(false)
         .mongoConnectionString(connectionString)
         .mongoDatabase(database)
         .mongoCollection(collection)
@@ -128,7 +128,7 @@ public class TestApp implements MongoEventListener {
   }
 
   @Override
-  public void importDocument(Document doc) {
+  public void exportDocument(Document doc) {
     System.out.println("Import: " + doc.toString());
   }
 

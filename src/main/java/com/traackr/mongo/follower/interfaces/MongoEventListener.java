@@ -54,11 +54,11 @@ public interface MongoEventListener {
   }
 
   /**
-   * Initial import documents come through this event.
+   * Initial export documents come through this event.
    *
-   * @param doc document being imported.
+   * @param doc document being exported.
    */
-  void importDocument(Document doc);
+  void exportDocument(Document doc);
 
   void delete(Delete entry);
 

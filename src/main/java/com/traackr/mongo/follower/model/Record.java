@@ -31,15 +31,15 @@ import org.bson.Document;
  */
 public class Record {
   public final OplogEntry oplogEntry;
-  public final Document importDocument;
+  public final Document exportDocument;
 
   public Record(OplogEntry entry) {
     oplogEntry = entry;
-    importDocument = null;
+    exportDocument = null;
   }
 
   public Record(Document doc) {
     oplogEntry = null;
-    importDocument = doc;
+    exportDocument = doc;
   }
 }

@@ -86,7 +86,7 @@ public class Runner {
     OpLogTailerParams mongoParams = null;
     mongoParams = OpLogTailerParams.with(
         globalParams,
-        config.getInitialImport(),
+        config.getInitialExport(),
         config.getQueue(),
         config.getMongoConnectionString(),
         config.getMongoDatabase(),
@@ -144,7 +144,7 @@ public class Runner {
    * Load settings from property file:
    * dry-run
    * oplog-file
-   * initial-import
+   * initial-export
    * mongo.connection-string
    * mongo.database
    * mongo.collection
@@ -159,7 +159,7 @@ public class Runner {
           .oplogDelayMinutes(Integer.valueOf(properties.getProperty("mongo.oplog-delay")))
           .oplogUpdateIntervalMinutes(
               Integer.valueOf(properties.getProperty("mongo.oplog-interval")))
-          .initialImport(Boolean.valueOf(properties.getProperty("initial-import")))
+          .initialExport(Boolean.valueOf(properties.getProperty("initial-export")))
           .mongoConnectionString(properties.getProperty("mongo.connection-string"))
           .mongoDatabase(properties.getProperty("mongo.database"))
           .mongoCollection(properties.getProperty("mongo.collection"))
