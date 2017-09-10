@@ -101,17 +101,17 @@ public class MongoFollower implements Runnable {
    */
   public void run() {
     try {
-      if (params.doImport) {
+      if (params.doExport) {
         // Perform initial import
-        logger.info("Starting initial import!");
+        logger.info("Starting initial export!");
         try {
           MongoClient client = new MongoClient(new MongoClientURI(params.getConnectionString()));
           MongoCollection<Document> collection =
               client.getDatabase(params.database).getCollection(params.collection);
-          InitialExporter importer = new InitialExporter(params.queue, collection);
-          importer.doImport();
+          InitialExporter exporter = new InitialExporter(params.queue, collection);
+          exporter.doExport();
         } catch (Exception e) {
-          logger.log(Level.SEVERE, "Exception during initial import!", e);
+          logger.log(Level.SEVERE, "Exception during initial export!", e);
           System.exit(1);
         }
         logger.info("Initial import complete!");
