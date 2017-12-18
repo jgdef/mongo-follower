@@ -38,7 +38,7 @@ public class Delete extends OplogEntry {
   Delete(Document doc) {
     super(doc);
 
-    this.query = doc.get("o", Document.class);
+    this.query = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
   }
 
   public Document getQuery() {

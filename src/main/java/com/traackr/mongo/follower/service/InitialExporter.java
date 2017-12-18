@@ -24,8 +24,7 @@
 package com.traackr.mongo.follower.service;
 
 import com.traackr.mongo.follower.model.Record;
-
-import com.mongodb.BasicDBObject;
+import com.google.common.collect.ImmutableSet;
 import com.mongodb.ServerCursor;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -33,9 +32,8 @@ import com.mongodb.client.MongoCursor;
 
 import org.bson.Document;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -44,16 +42,17 @@ import java.util.logging.Logger;
  */
 public class InitialExporter {
   private static final Logger logger = Logger.getLogger(OpLogProcessor.class.getName());
+  private static final Document ALL_FILTER = Document.parse("{}");
 
-  private final MongoCollection<Document> collection;
-  private final BlockingQueue<Record> queue;
-  private long cursorId;
+  private final Set<MongoCollection<Document>> collections;
+  private final OpLogSink sink;
+  private long cursorId;    // not used yet
   private MongoCursor<Document> cursor;
 
-  public InitialExporter(BlockingQueue<Record> queue,
-                         MongoCollection<Document> collection) {
-    this.queue = queue;
-    this.collection = collection;
+  public InitialExporter(OpLogSink sink,
+                         Set<MongoCollection<Document>> collections) {
+    this.sink = sink;
+    this.collections = ImmutableSet.copyOf(collections);
   }
 
   /**
@@ -67,32 +66,27 @@ public class InitialExporter {
         cur = cursor.next();
       }
 
-      try {
-        if (queue.offer(new Record(cur), 5, TimeUnit.SECONDS)) {
-          // Clear out current document.
-          cur = null;
-        } else {
-          // Failed to put document into the queue, don't clear 'cur' so another attempt is made.
-          logger.warning("Failed to put next record in the queue.");
-        }
-      } catch (InterruptedException e) {
-        // This is fine, keep trying.
-        logger.log(Level.WARNING, "Queue offer interrupted.", e);
-      }
+      if (sink.send(new Record(cur), 5, TimeUnit.SECONDS)) {
+        // Clear out current document.
+        cur = null;
+      } else {
+        // Failed to put document into the oplogSink, don't clear 'cur' so another attempt is made.
+        logger.warning("Failed to put next record in the oplogSink.");
+      }      
     }
   }
 
   /**
    * Get the MongoDB cursor.
    */
-  private MongoCursor<Document> getCursor() {
+  private synchronized MongoCursor<Document> getCursor() {
     if (cursor == null) {
-      FindIterable<Document> results = collection
-          .find(Document.parse("{}"))
-          .sort(new BasicDBObject("$natural", 1))
-          .noCursorTimeout(true);
+      FindIterable<Document> results = collections.stream().findFirst().get()
+          .find(ALL_FILTER)
+          .batchSize(1000)
+          .noCursorTimeout(true)
+          .sort(MongoFollower.NATURAL_SORT_FOR_COLLECTION_SCAN);
       cursor = results.iterator();
-
       ServerCursor serverCursor = cursor.getServerCursor();
       if (serverCursor != null) {
         // TODO: Persist cursor ID somewhere to allow restarts.

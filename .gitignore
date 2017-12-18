@@ -37,3 +37,9 @@ tmp
 # build script local files
 *-local.properties
 links_env_py/
+
+# Generated code
+src/main/java/com/belmonttech/model/gen/
+/.gradle/
+/bin/
+/build/

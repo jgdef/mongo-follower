@@ -24,9 +24,11 @@
 package com.traackr.mongo.follower.model;
 
 import com.traackr.mongo.follower.interfaces.MongoEventListener;
+import com.traackr.mongo.follower.service.OpLogSink;
+import com.traackr.mongo.follower.service.OpLogSource;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.nio.file.Path;
+import java.util.Set;
 
 import lombok.Builder;
 import lombok.Data;
@@ -55,12 +57,19 @@ public class FollowerConfig {
   Integer oplogUpdateIntervalMinutes = 10;
 
   /**
-   * The thread-safe queue to use.
+   * The oplogSink implementation.
    */
   @NonNull
   @Builder.Default
-  BlockingQueue<Record> queue = new ArrayBlockingQueue<>(4000);
+  OpLogSink oplogSink;
 
+  /**
+   * The oplogSource implementation.
+   */
+  @NonNull
+  @Builder.Default
+  OpLogSource oplogSource;
+  
   /**
    * The callback handler.
    */
@@ -71,7 +80,7 @@ public class FollowerConfig {
    * Location of oplog file.
    */
   @NonNull
-  String oplogFile;
+  Path oplogFile;
 
   /**
    * Mongo connection string.
@@ -80,20 +89,20 @@ public class FollowerConfig {
   String mongoConnectionString;
 
   /**
-   * Which database to tail.
+   * Which database(s) to tail.
    */
   @NonNull
-  String mongoDatabase;
+  Set<String> mongoDatabases;
 
   /**
-   * Which collection to tail.
+   * Which collection(s) to tail.
    */
   @NonNull
-  String mongoCollection;
+  Set<String> mongoCollections;
 
   /**
    * Whether to do an initial export on the collection before oplog tailing.
-   * TODO: Default value.
+   * TODO: Separate process?
    */
   @NonNull
   @Builder.Default

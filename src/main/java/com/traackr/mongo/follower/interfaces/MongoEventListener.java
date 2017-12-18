@@ -31,10 +31,6 @@ import com.traackr.mongo.follower.model.Update;
 
 import org.bson.Document;
 
-/**
- * @author wwinder
- *         Created on: 12/8/16
- */
 public interface MongoEventListener {
   /**
    * Dispatch the latest oplog entry to the listener

@@ -28,12 +28,14 @@ import com.traackr.mongo.follower.util.KillSwitch;
 import org.bson.types.BSONTimestamp;
 
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * @author wwinder
  *         Created on: 5/29/16
  */
 @Data
+@Getter
 public class GlobalParams {
   public GlobalParams(KillSwitch running, BSONTimestamp oplogTime,
                       int oplogDelay, int oplogInterval, String dateFormat, Boolean longToString) {

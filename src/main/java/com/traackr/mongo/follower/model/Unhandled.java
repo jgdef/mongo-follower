@@ -38,4 +38,9 @@ public class Unhandled extends OplogEntry {
   public String getId() {
     return null;
   }
+  
+  @Override
+  public boolean shouldSkip() {
+	  return true;
+  }
 }

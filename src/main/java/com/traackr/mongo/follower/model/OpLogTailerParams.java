@@ -23,7 +23,9 @@
  */
 package com.traackr.mongo.follower.model;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Set;
+
+import com.traackr.mongo.follower.service.OpLogSink;
 
 import lombok.Value;
 import lombok.NonNull;
@@ -39,12 +41,12 @@ public class OpLogTailerParams {
   @NonNull
   public Boolean doExport;
   @NonNull
-  public BlockingQueue<Record> queue;
+  public OpLogSink oplogSink;
   @NonNull
   public String connectionString;
   @NonNull
-  public String database;
+  public Set<String> database;
   @NonNull
-  public String collection;
+  public Set<String> collections;
 }
 

@@ -28,14 +28,11 @@ import com.traackr.mongo.follower.model.GlobalParams;
 import com.traackr.mongo.follower.model.OplogEntry;
 import com.traackr.mongo.follower.model.Record;
 
-import org.bson.types.BSONTimestamp;
-
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Process OplogEntry objects from a queue and send them to elasticsearch.
+ * Process OplogEntry objects from a oplogSink and send them to the oplog sink.
  *
  * @author wwinder
  * Created on: 5/25/16
@@ -44,15 +41,15 @@ public class OpLogProcessor implements Runnable {
   private static final Logger logger = Logger.getLogger(OpLogProcessor.class.getName());
 
   private final GlobalParams globals;
-  private final BlockingQueue<Record> recordQueue;
+  private final OpLogSource oplogSource;
   private final MongoEventListener oplogEventListener;
 
   public OpLogProcessor(
       GlobalParams globals,
-      BlockingQueue<Record> recordQueue,
+      OpLogSource oplogSource,
       MongoEventListener oplogEventListener) {
     this.globals = globals;
-    this.recordQueue = recordQueue;
+    this.oplogSource = oplogSource;
     this.oplogEventListener = oplogEventListener;
   }
 
@@ -63,13 +60,7 @@ public class OpLogProcessor implements Runnable {
   public void run() {
     try {
       while (globals.running.isRunning()) {
-        Record record = null;
-        try {
-          record = recordQueue.take();
-        } catch (InterruptedException e) {
-          logger.log(Level.SEVERE, "Exception while taking an op log document.", e);
-        }
-
+        Record record = (Record) oplogSource.take();
         if (record != null) {
 
           // Initial export
@@ -82,8 +73,6 @@ public class OpLogProcessor implements Runnable {
             OplogEntry entry = record.oplogEntry;
 
             // Process the document, manage oplog timestamp on success.
-            BSONTimestamp oplogTime = entry.getTimestamp();
-
             if (processEntry(entry)) {
               globals.oplogTime = entry.getTimestamp();
             }

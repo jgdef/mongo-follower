@@ -63,7 +63,8 @@ public class Update extends OplogEntry {
    */
   private final Document query;
 
-  Update(final Document doc) {
+  @SuppressWarnings("unchecked")
+Update(final Document doc) {
     super(doc);
 
     final Document updateSpec = doc.get("o", Document.class);
@@ -78,7 +79,7 @@ public class Update extends OplogEntry {
       this.document = updateSpec;
     }
 
-    this.query = doc.get("o2", Document.class);
+    this.query = doc.get(OPLOG_FIELD_DOC_FILTER, Document.class);
   }
 
   public UpdateType getType() {

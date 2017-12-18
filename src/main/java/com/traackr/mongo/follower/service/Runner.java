@@ -30,7 +30,6 @@ import com.traackr.mongo.follower.interfaces.MongoEventListener;
 import com.traackr.mongo.follower.model.GlobalParams;
 import com.traackr.mongo.follower.model.OpLogTailerParams;
 import com.traackr.mongo.follower.model.OplogTimestampWriter;
-import com.traackr.mongo.follower.model.Record;
 import com.traackr.mongo.follower.model.FollowerConfig;
 import com.traackr.mongo.follower.util.KillSwitch;
 
@@ -39,21 +38,27 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import org.springframework.util.StringUtils;
 
 /**
  * @author wwinder
  * Created on: 7/18/17
  */
 public class Runner {
+  // The fixed number of threads for the executor. TODO: there is a single executor that both
+  // reads oplog entries and writes to the oplog sink (and also runs a task better suited to 
+  // its own timer), so it's difficult to size the pool to not starve either end. Eventually,
+  // split into two executors so all executing threads are homogenous.
+  private static final int DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors();
   public static void run(FollowerConfig config) throws FailedToStartException {
     // Initialize oplog dir.
     try {
-      Path oplogFilePath = Paths.get(config.getOplogFile());
+      Path oplogFilePath = config.getOplogFile();
       Path parentDirectory = oplogFilePath.getParent();
       if (parentDirectory == null) {
         throw new FailedToStartException(
@@ -75,7 +80,7 @@ public class Runner {
     // Global properties.
     GlobalParams globalParams = new GlobalParams(
         new KillSwitch(),
-        getOplogTimestamp(config.getOplogFile()),
+        getOplogTimestamp(config.getOplogFile().toString()),
         config.getOplogDelayMinutes(),
         config.getOplogUpdateIntervalMinutes(),
         null,
@@ -83,21 +88,22 @@ public class Runner {
     );
 
     // Mongo properties
-    OpLogTailerParams mongoParams = null;
-    mongoParams = OpLogTailerParams.with(
+    OpLogTailerParams mongoParams = OpLogTailerParams.with(
         globalParams,
         config.getInitialExport(),
-        config.getQueue(),
+        config.getOplogSink(),
         config.getMongoConnectionString(),
-        config.getMongoDatabase(),
-        config.getMongoCollection());
+        config.getMongoDatabases(),
+        config.getMongoCollections());
 
-    // Initialize OpLogTail
+    // Initialize OpLogTail. This does the initial export (for now, may split that out),
+    // reads from the oplog collection itself and writes to the oplog sink.
     MongoFollower oplogTailer = new MongoFollower(mongoParams);
 
-    // Initialize OpLogProcessor
+    // Initialize OpLogProcessor. This reads from the oplog sink and processes the
+    // records. For this use case, that means writing to Cassandra.
     OpLogProcessor oplogProcessor = new OpLogProcessor(
-        globalParams, config.getQueue(), config.getListener());
+        globalParams, config.getOplogSource(), config.getListener());
 
     // Oplog writer
     OplogTimestampWriter oplogWriter = new OplogTimestampWriter(globalParams);
@@ -105,24 +111,24 @@ public class Runner {
     ///////////////////
     // Start threads //
     ///////////////////
-    launchThreads(config.getQueue(), oplogTailer, oplogProcessor, oplogWriter);
+    launchThreads(/*config.getQueue(), */oplogTailer, oplogProcessor, oplogWriter);
   }
 
   private static void launchThreads(
-      final BlockingQueue<Record> queue,
+      //final BlockingQueue<Record> oplogSink,
       MongoFollower oplogTailer,
       OpLogProcessor oplogProcessor,
       OplogTimestampWriter oplogWriter) {
-    final ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
-
+    final ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_NUM_THREADS);
     pool.submit(oplogTailer);
     pool.submit(oplogProcessor);
     pool.submit(oplogWriter);
 
-    // This seems weird.
+    // This seems weird. Update: JGD - it's not weird, but there are better ways of monitoring
+    // executor health and distribution of tasks.
     pool.submit(() -> {
       while (!Thread.interrupted() && pool.getActiveCount() != 0) {
-        //logger.info("OplogQueue size: " + queue.size());
+        //logger.info("OplogQueue size: " + oplogSink.size());
 
         if (pool.getActiveCount() == 0) {
           //logger.error("The threads are gone!!");
@@ -133,7 +139,7 @@ public class Runner {
         try {
           Thread.sleep(10000);
         } catch (InterruptedException e) {
-          //logger.error("Sleep threw an exception.", e);
+          e.printStackTrace(System.err);
           Thread.interrupted();
         }
       }
@@ -154,15 +160,16 @@ public class Runner {
     try {
       FollowerConfig config = FollowerConfig.builder()
           .listener(listener)
-          .queue(new ArrayBlockingQueue<>(Integer.valueOf(properties.getProperty("queue-size"))))
-          .oplogFile(properties.getProperty("oplog-file"))
+         // .oplogSink(queue)
+         // .oplogSource(queue)
+          .oplogFile(Paths.get(properties.getProperty("oplog-file")))
           .oplogDelayMinutes(Integer.valueOf(properties.getProperty("mongo.oplog-delay")))
           .oplogUpdateIntervalMinutes(
               Integer.valueOf(properties.getProperty("mongo.oplog-interval")))
           .initialExport(Boolean.valueOf(properties.getProperty("initial-export")))
           .mongoConnectionString(properties.getProperty("mongo.connection-string"))
-          .mongoDatabase(properties.getProperty("mongo.database"))
-          .mongoCollection(properties.getProperty("mongo.collection"))
+          .mongoDatabases(StringUtils.commaDelimitedListToSet(properties.getProperty("mongo.database")))
+          .mongoCollections(Collections.singleton(properties.getProperty("mongo.collection")))
           .build();
       run(config);
     } catch (Exception e) {

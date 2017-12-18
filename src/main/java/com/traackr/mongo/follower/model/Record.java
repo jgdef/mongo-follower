@@ -23,23 +23,26 @@
  */
 package com.traackr.mongo.follower.model;
 
+import java.io.Serializable;
+
 import org.bson.Document;
 
 /**
  * @author wwinder
  *         Created on: 12/14/16
  */
-public class Record {
-  public final OplogEntry oplogEntry;
-  public final Document exportDocument;
+public class Record implements Serializable {
+	private static final long serialVersionUID = 6317446949572990670L;
+    public final OplogEntry oplogEntry;
+    public final Document exportDocument;
 
-  public Record(OplogEntry entry) {
-    oplogEntry = entry;
-    exportDocument = null;
-  }
+    public Record(OplogEntry entry) {
+        oplogEntry = entry;
+        exportDocument = null;
+    }
 
-  public Record(Document doc) {
-    oplogEntry = null;
-    exportDocument = doc;
-  }
+      public Record(Document doc) {
+        oplogEntry = null;
+        exportDocument = doc;
+    }
 }

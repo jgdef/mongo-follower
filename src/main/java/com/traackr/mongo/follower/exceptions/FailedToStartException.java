@@ -29,7 +29,10 @@ package com.traackr.mongo.follower.exceptions;
  *         Created on: 7/18/17
  */
 public class FailedToStartException extends Exception {
-  public FailedToStartException(String message) {
+
+  private static final long serialVersionUID = -1355274759477681530L;
+
+public FailedToStartException(String message) {
     super(message);
   }
 

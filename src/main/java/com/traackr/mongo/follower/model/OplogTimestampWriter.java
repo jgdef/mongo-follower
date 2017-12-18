@@ -42,7 +42,7 @@ public class OplogTimestampWriter implements Runnable {
 
   @Override
   public void run() {
-    int delaySeconds = (int) MINUTES.toSeconds(globals.oplogDelay);
+    int delaySeconds = Math.toIntExact(MINUTES.toSeconds(globals.oplogDelay));
     long intervalMs = MINUTES.toMillis(globals.oplogInterval);
     while (!Thread.interrupted()) {
       try {

@@ -38,7 +38,7 @@ public class Insert extends OplogEntry {
   Insert(Document doc) {
     super(doc);
 
-    this.document = doc.get("o", Document.class);
+    this.document = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
   }
 
   public Document getDocument() {

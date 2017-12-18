@@ -71,7 +71,7 @@ public class MongoCodecHelper {
       BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap(replacements);
       DocumentCodecProvider documentCodecProvider = new DocumentCodecProvider(bsonTypeClassMap);
 
-      CodecRegistry codecRegistry = codecRegistry = CodecRegistries.fromRegistries(
+      CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
           CodecRegistries.fromCodecs(codecs),
           CodecRegistries.fromProviders(documentCodecProvider),
           MongoClient.getDefaultCodecRegistry());
