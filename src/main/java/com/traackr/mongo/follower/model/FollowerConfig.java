@@ -69,7 +69,7 @@ public class FollowerConfig {
   @NonNull
   @Builder.Default
   OpLogSource oplogSource;
-  
+
   /**
    * The callback handler.
    */

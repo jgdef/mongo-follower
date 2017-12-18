@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  */
 public class Runner {
   // The fixed number of threads for the executor. TODO: there is a single executor that both
-  // reads oplog entries and writes to the oplog sink (and also runs a task better suited to 
+  // reads oplog entries and writes to the oplog sink (and also runs a task better suited to
   // its own timer), so it's difficult to size the pool to not starve either end. Eventually,
   // split into two executors so all executing threads are homogenous.
   private static final int DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors();

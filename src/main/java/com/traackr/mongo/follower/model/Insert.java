@@ -30,23 +30,22 @@ import org.bson.Document;
  * Created on: 7/19/17
  */
 public class Insert extends OplogEntry {
-  /**
-   * Full Document inserted into Mongo
-   */
-  private final Document document;
+    /**
+     * Full Document inserted into Mongo
+     */
+    private final Document document;
 
-  Insert(Document doc) {
-    super(doc);
+    Insert(Document doc) {
+        super(doc);
+        this.document = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
+    }
 
-    this.document = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
-  }
+    public Document getDocument() {
+        return this.document;
+    }
 
-  public Document getDocument() {
-    return this.document;
-  }
-
-  @Override
-  public String getId() {
-    return this.document.getString("_id");
-  }
+    @Override
+    public String getId() {
+        return this.document.getString("_id");
+    }
 }

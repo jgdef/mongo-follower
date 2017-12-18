@@ -21,22 +21,15 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-
 package com.traackr.mongo.follower.exceptions;
 
-/**
- * @author wwinder
- *         Created on: 7/18/17
- */
 public class FailedToStartException extends Exception {
+    private static final long serialVersionUID = -1355274759477681530L;
+    public FailedToStartException(String message) {
+        super(message);
+    }
 
-  private static final long serialVersionUID = -1355274759477681530L;
-
-public FailedToStartException(String message) {
-    super(message);
-  }
-
-  public FailedToStartException(String message, Throwable e) {
-    super(message, e);
-  }
+    public FailedToStartException(String message, Throwable e) {
+        super(message, e);
+    }
 }

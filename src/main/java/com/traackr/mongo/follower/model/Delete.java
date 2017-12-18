@@ -30,23 +30,22 @@ import org.bson.Document;
  * Created on: 7/19/17
  */
 public class Delete extends OplogEntry {
-  /**
-   * Mongo query that identifies the deleted Document
-   */
-  private final Document query;
+    /**
+     * Mongo query that identifies the deleted Document
+     */
+    private final Document query;
 
-  Delete(Document doc) {
-    super(doc);
+    Delete(Document doc) {
+        super(doc);
+        this.query = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
+    }
 
-    this.query = doc.get(OplogEntry.OPLOG_FIELD_DOC, Document.class);
-  }
+    public Document getQuery() {
+        return query;
+    }
 
-  public Document getQuery() {
-    return query;
-  }
-
-  @Override
-  public String getId() {
-    return query.getString("_id");
-  }
+    @Override
+    public String getId() {
+        return query.getString("_id");
+    }
 }

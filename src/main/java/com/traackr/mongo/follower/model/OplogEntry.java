@@ -36,7 +36,7 @@ import org.bson.types.BSONTimestamp;
  */
 
 /**
- * JGD: op log format (as of 3.4.9)"
+ * JGD: op log format (as of 3.4.9):
  * {
  *   "ts": Timestamp,
  *   "t": NumberLong,
@@ -47,96 +47,94 @@ import org.bson.types.BSONTimestamp;
  *   "o": Document
  *   "o2": Document
  * }
- *   
- *   "h" is a unique ID (hash), even for events with the same timestamp; 
- *       the values are never repeated in the same oplog
- *   "v" is the oplog format version, currently (v3.4.9) 2.
- *   "op" is a 1 or 2 character string describing the op log entry type: 'i' (insert), 'u' (update), 'd' (delete),
- *                                                                       'c' (command), 'db' (database-level commands), 
- *                                                                       'n' (no-op)
- *   "ns" is the 'namespace', typically "<database name>.<collection name>"
- *   "o"
- *   "o2" is only applicable to update oplog entries; it's the filter to identify the document(s) 
- *        that will be affected (by the data in the "o" field).
+ *
+ *   ts: mongo-internal timestamp
+ *   t:
+ *   h: a unique ID (hash), even for events with the same timestamp;
+ *      the values are never repeated in the same oplog
+ *   v: the oplog format version, currently (v3.4.9) 2.
+ *   op: a 1 or 2 character string describing the op log entry type: 'i' (insert), 'u' (update), 'd' (delete),
+ *                                                                      'c' (command), 'db' (database-level commands),
+ *                                                                      'n' (no-op)
+ *   ns: the 'namespace', typically "<database name>.<collection name>"
+ *   o: the document which contains the data itself
+ *   o2: only applicable to update oplog entries; it's the filter to identify the document(s)
+ *       that will be affected (by the data in the "o" field).
  */
 public abstract class OplogEntry {
-  private static final Logger logger = Logger.getLogger(OplogEntry.class.getName());
-  private static final Integer OPLOG_VERSION = new Integer(2);
-  public static final String OPLOG_FIELD_DOC = "o";
-  public static final String OPLOG_FIELD_DOC_FILTER = "o2";  
-  public static final String OPLOG_FIELD_TYPE = "op";
-  public static final String OPLOG_INSERT = "i";
-  public static final String OPLOG_UPDATE = "u";
-  public static final String OPLOG_DELETE = "d";
-  static final String OPLOG_COMMAND = "c";
-  static final String OPLOG_DB_COMMAND = "db";
-  static final String OPLOG_NOOP = "n";
-  static final String OPLOG_FIELD_VERSION = "v";
+    private static final Logger logger = Logger.getLogger(OplogEntry.class.getName());
+    private static final Integer OPLOG_VERSION = new Integer(2);
+    public static final String OPLOG_FIELD_DOC = "o";
+    public static final String OPLOG_FIELD_DOC_FILTER = "o2";
+    public static final String OPLOG_FIELD_TYPE = "op";
+    public static final String OPLOG_INSERT = "i";
+    public static final String OPLOG_UPDATE = "u";
+    public static final String OPLOG_DELETE = "d";
+    static final String OPLOG_COMMAND = "c";
+    static final String OPLOG_DB_COMMAND = "db";
+    static final String OPLOG_NOOP = "n";
+    static final String OPLOG_FIELD_VERSION = "v";
 
-  private final Document rawEntry;
-  private final BSONTimestamp timestamp;
-  private final String namespace;
+    private final Document rawEntry;
+    private final BSONTimestamp timestamp;
+    private final String namespace;
 
-  OplogEntry(Document doc) {
-    rawEntry = doc;
-
-    BsonTimestamp ts = doc.get("ts", BsonTimestamp.class);
-    timestamp = new BSONTimestamp(ts.getTime(), ts.getInc());
-    namespace = doc.getString("ns");
-  }
-
-  // CTOR used on the serialization side 
-  OplogEntry(Map<String, Object> doc) {
-	  rawEntry = new Document(doc);
-	  BsonTimestamp ts = rawEntry.get("ts", BsonTimestamp.class);
-	  timestamp = new BSONTimestamp(ts.getTime(), ts.getInc());
-	  namespace = rawEntry.getString("ns");
-  }
-  
-  public static OplogEntry of(final Document doc) {
-	Integer version = doc.getInteger(OPLOG_FIELD_VERSION);
-	if (version == null || !version.equals(OPLOG_VERSION)) {
-		logger.severe("Unrecognized op log entry version " + version);
-		return null;
-	}
-
-    final String operation = doc.getString(OPLOG_FIELD_TYPE);
-    switch (operation) {
-      case OPLOG_INSERT:
-        return new Insert(doc);
-      case OPLOG_UPDATE:
-        return new Update(doc);
-      case OPLOG_DELETE:
-        return new Delete(doc);
-      case OPLOG_COMMAND:
-        return new Command(doc);
-      case OPLOG_NOOP:
-      case OPLOG_DB_COMMAND:
-      default:
-        return new Unhandled(doc);
+    OplogEntry(Document doc) {
+        BsonTimestamp ts = doc.get("ts", BsonTimestamp.class);
+        timestamp = new BSONTimestamp(ts.getTime(), ts.getInc());
+        namespace = doc.getString("ns");
+        rawEntry = doc;
     }
-  }
 
-  public Document getRawEntry() {
-    return rawEntry;
-  }
+    /** Constructor used for deserialization */
+    OplogEntry(Map<String, Object> doc) {
+        this(new Document(doc));
+    }
 
-  public BSONTimestamp getTimestamp() {
-    return timestamp;
-  }
+    public static OplogEntry of(final Document doc) {
+      Integer version = doc.getInteger(OPLOG_FIELD_VERSION);
+      if (version == null || !version.equals(OPLOG_VERSION)) {
+          logger.severe("Unrecognized op log entry version " + version);
+          return null;
+      }
 
-  public String getNamespace() {
-    return namespace;
-  }
+      final String operation = doc.getString(OPLOG_FIELD_TYPE);
+      switch (operation) {
+          case OPLOG_INSERT:
+              return new Insert(doc);
+          case OPLOG_UPDATE:
+              return new Update(doc);
+          case OPLOG_DELETE:
+              return new Delete(doc);
+          case OPLOG_COMMAND:
+              return new Command(doc);
+          case OPLOG_NOOP:
+          case OPLOG_DB_COMMAND:
+          default:
+              return new Unhandled(doc);
+        }
+    }
 
-  public abstract String getId();
+    public Document getRawEntry() {
+        return rawEntry;
+    }
 
-  public boolean shouldSkip() {
-	  return false;
-  }
-  
-  @Override
-  public String toString() {
-    return String.format("%s(id=%s)", this.getClass().getSimpleName(), this.getId());
-  }
+    public BSONTimestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public boolean shouldSkip() {
+        return false;
+    }
+
+    public abstract String getId();
+
+    @Override
+    public String toString() {
+        return String.format("%s(id=%s)", this.getClass().getSimpleName(), this.getId());
+    }
 }

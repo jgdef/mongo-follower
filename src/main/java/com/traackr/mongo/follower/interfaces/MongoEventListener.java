@@ -37,16 +37,16 @@ public interface MongoEventListener {
    *
    * @param entry
    */
-  default void dispatch(final OplogEntry entry) {
-    if (entry instanceof Insert) {
-      insert((Insert) entry);
-    } else if (entry instanceof Update) {
-      update((Update) entry);
-    } else if (entry instanceof Delete) {
-      delete((Delete) entry);
-    } else if (entry instanceof Command) {
-      command((Command) entry);
-    }
+    default void dispatch(final OplogEntry entry) {
+      if (entry instanceof Insert) {
+          insert((Insert) entry);
+      } else if (entry instanceof Update) {
+          update((Update) entry);
+      } else if (entry instanceof Delete) {
+          delete((Delete) entry);
+      } else if (entry instanceof Command) {
+          command((Command) entry);
+      }
   }
 
   /**

@@ -37,14 +37,14 @@ import lombok.Getter;
 @Data
 @Getter
 public class GlobalParams {
-  public GlobalParams(KillSwitch running, BSONTimestamp oplogTime,
-                      int oplogDelay, int oplogInterval, String dateFormat, Boolean longToString) {
-    this.running = running;
-    this.oplogTime = oplogTime;
-    this.oplogDelay = oplogDelay;
-    this.oplogInterval = oplogInterval;
-    this.dateFormat = dateFormat;
-    this.longToString = longToString;
+    public GlobalParams(KillSwitch running, BSONTimestamp oplogTime,
+                        int oplogDelay, int oplogInterval, String dateFormat, Boolean longToString) {
+        this.running = running;
+        this.oplogTime = oplogTime;
+        this.oplogDelay = oplogDelay;
+        this.oplogInterval = oplogInterval;
+        this.dateFormat = dateFormat;
+        this.longToString = longToString;
   }
 
   public KillSwitch running;

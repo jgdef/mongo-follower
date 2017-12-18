@@ -36,17 +36,17 @@ import lombok.NonNull;
  */
 @Value(staticConstructor="with")
 public class OpLogTailerParams {
-  @NonNull
-  public GlobalParams globals;
-  @NonNull
-  public Boolean doExport;
-  @NonNull
-  public OpLogSink oplogSink;
-  @NonNull
-  public String connectionString;
-  @NonNull
-  public Set<String> database;
-  @NonNull
-  public Set<String> collections;
+    @NonNull
+    public GlobalParams globals;
+    @NonNull
+    public Boolean doExport;
+    @NonNull
+    public OpLogSink oplogSink;
+    @NonNull
+    public String connectionString;
+    @NonNull
+    public Set<String> database;
+    @NonNull
+    public Set<String> collections;
 }
 

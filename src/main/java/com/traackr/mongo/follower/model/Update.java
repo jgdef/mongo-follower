@@ -36,21 +36,21 @@ import java.util.Map;
  * Created on: 7/19/17
  */
 public class Update extends OplogEntry {
-  public enum UpdateType {
-    /**
-     * Replace specified fields with new values
-     */
-    SET,
+    public enum UpdateType {
+      /**
+       * Replace specified fields with new values
+       */
+      SET,
 
-    /**
-     * Remove specified fields from the document
-     */
-    UNSET,
+      /**
+       * Remove specified fields from the document
+       */
+      UNSET,
 
-    /**
-     * Completely replace the existing document
-     */
-    REPLACE
+      /**
+       * Completely replace the existing document
+       */
+      REPLACE
   }
 
   private final UpdateType type;
@@ -64,38 +64,38 @@ public class Update extends OplogEntry {
   private final Document query;
 
   @SuppressWarnings("unchecked")
-Update(final Document doc) {
-    super(doc);
+  Update(final Document doc) {
+      super(doc);
 
-    final Document updateSpec = doc.get("o", Document.class);
-    if (updateSpec.containsKey("$set")) {
-      this.type = SET;
-      this.document = new Document(updateSpec.get("$set", Map.class));
-    } else if (updateSpec.containsKey("$unset")) {
-      this.type = UNSET;
-      this.document = new Document(updateSpec.get("$unset", Map.class));
-    } else {
-      this.type = REPLACE;
-      this.document = updateSpec;
-    }
+      final Document updateSpec = doc.get("o", Document.class);
+      if (updateSpec.containsKey("$set")) {
+          this.type = SET;
+          this.document = new Document(updateSpec.get("$set", Map.class));
+      } else if (updateSpec.containsKey("$unset")) {
+          this.type = UNSET;
+          this.document = new Document(updateSpec.get("$unset", Map.class));
+      } else {
+          this.type = REPLACE;
+          this.document = updateSpec;
+      }
 
-    this.query = doc.get(OPLOG_FIELD_DOC_FILTER, Document.class);
+      this.query = doc.get(OPLOG_FIELD_DOC_FILTER, Document.class);
   }
 
   public UpdateType getType() {
-    return this.type;
+      return type;
   }
 
   public Document getQuery() {
-    return this.query;
+      return query;
   }
 
   public Document getDocument() {
-    return document;
+      return document;
   }
 
   @Override
   public String getId() {
-    return this.query.getString("_id");
+      return this.query.getString("_id");
   }
 }

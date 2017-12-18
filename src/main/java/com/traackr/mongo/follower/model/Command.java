@@ -30,12 +30,12 @@ import org.bson.Document;
  * Created on: 7/19/17
  */
 public class Command extends OplogEntry {
-  Command(Document doc) {
-    super(doc);
-  }
+    Command(Document doc) {
+        super(doc);
+    }
 
-  @Override
-  public String getId() {
-    return null;
-  }
+    @Override
+    public String getId() {
+        return null;
+    }
 }

@@ -51,7 +51,7 @@ import java.util.concurrent.Future;
  * Created by wwinder on 6/17/16.
  */
 public class MongoFollowerTest {
-/*	
+/*
   GlobalParams globalParams;
   ArrayBlockingQueue<Record> oplogSink;
   OpLogTailerParams params;

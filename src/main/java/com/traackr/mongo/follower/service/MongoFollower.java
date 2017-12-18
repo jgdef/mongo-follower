@@ -52,32 +52,31 @@ import java.util.logging.Logger;
  * Created on: 5/25/16
  */
 public class MongoFollower implements Runnable {
-  private static final Logger logger = Logger.getLogger(MongoFollower.class.getName());
-  static final Bson NATURAL_SORT_FOR_COLLECTION_SCAN = new BasicDBObject("$natural", new Integer(1));
-  static final String OPLOG_NAMESPACE = "oplog.rs";
-  static final String OPLOG_NOOP_MESSAGE ="periodic noop";
-  
-  final private OpLogTailerParams params;
-  private MongoClient client;
+    private static final Logger logger = Logger.getLogger(MongoFollower.class.getName());
+    static final Bson NATURAL_SORT_FOR_COLLECTION_SCAN = new BasicDBObject("$natural", new Integer(1));
+    static final String OPLOG_NAMESPACE = "oplog.rs";
+    static final String OPLOG_NOOP_MESSAGE ="periodic noop";
 
-  /**
-   * Create an oplog iterator through a given client.
-   *
-   * params.client     - MongoDB client connected to an instance.
-   * params.database   - Database containing the collection.
-   * params.collection - Collection to tail.
-   */
+    final private OpLogTailerParams params;
+    private MongoClient client;
+
+    /**
+     * Create an oplog iterator through a given client.
+     *
+     * params.client     - MongoDB client connected to an instance.
+     */
   public MongoFollower(OpLogTailerParams params) {
-    this.params = params;
+      this.params = params;
   }
 
   private MongoCursor<Document> getNewCursor() throws Exception {
-    logger.info("Getting oplog cursor for oplog time: " + params.globals.oplogTime.toString());
+      logger.info("Getting oplog cursor for oplog time: " + params.globals.oplogTime.toString());
 
-    client = new MongoClient(new MongoClientURI(params.getConnectionString()));
-    // Get the oplog.
-    MongoDatabase db = client.getDatabase("local");
-    MongoCollection<Document> coll = db.getCollection(OPLOG_NAMESPACE).withReadPreference(ReadPreference.primaryPreferred());
+      client = new MongoClient(new MongoClientURI(params.getConnectionString()));
+      // Get the oplog.
+      MongoDatabase db = client.getDatabase("local");
+      MongoCollection<Document> coll = db.getCollection(OPLOG_NAMESPACE)
+          .withReadPreference(ReadPreference.secondaryPreferred());
 
     // NOTE:
     // Add to query { fromMigrate: {$exists: false}} to handle a sharded environment.
@@ -85,7 +84,7 @@ public class MongoFollower implements Runnable {
     // In a clustered deployment tail all oplogs and wait until there is a majority.
     // JGD: TODO - what if there is a change to RS membership, or an election chooses
     // a different primary?
-    // 
+    //
     // JGD: In an actual deployment, each tailer process will be deployed to an instance
     // that contains only the databases its interested in. This means that though we
     // configure this process with a set of databases and only oplog records emitted
@@ -94,20 +93,16 @@ public class MongoFollower implements Runnable {
     // contains the metrics dbs. As a safety check, we'll check the oplog namespace field
     // for each query result. If we tried to filter the query itself, we'd have to filter
     // using regex to check the namespace field, which is needlessly expensive.
-    Document query = new Document()
-        .append("ts", new BasicDBObject("$gte", params.globals.oplogTime));
-        // .append("ns", new BasicDBObject("$eq", params.database + "." + params.collections.stream().findFirst().get()))
-        // fromMigrate indicates the operation results from a shard rebalancing.
+    Document query = new Document().append("ts", new BasicDBObject("$gte", params.globals.oplogTime));
         // ** DO NOT UNCOMMENT IF NOT IN A SHARDED ENVIRONMENT!
         // .append("fromMigrate", new BasicDBObject("$exists", "false"));
 
     return coll.find(query)
-    	// Is this needed for capped collections?
-    	// JGD: yes, force collection scan
+        // Is this needed for capped collections?
+        // JGD: yes, force collection scan
         .sort(NATURAL_SORT_FOR_COLLECTION_SCAN)
         .cursorType(CursorType.TailableAwait)
         .oplogReplay(true)
-         //.noCursorTimeout(true)
         .iterator();
   }
 
@@ -117,31 +112,31 @@ public class MongoFollower implements Runnable {
    */
   @Override
   public void run() {
-    try {
-      if (params.doExport) {
-        // Perform initial import
-        logger.info("Starting initial export!");
-        try (MongoClient exportClient = new MongoClient(new MongoClientURI(params.getConnectionString()))) {
-          MongoCollection<Document> collection = exportClient.getDatabase(params.database.iterator().next())
-                .getCollection(params.collections.stream().findFirst().get());
-          InitialExporter exporter = new InitialExporter(params.oplogSink, Collections.singleton(collection));
-          exporter.doExport();
-        } catch (Exception e) {
-          logger.log(Level.SEVERE, "Exception during initial export!", e);
-          System.exit(1);
-        }
-        logger.info("Initial import complete!");
-      }
+      try {
+          if (params.doExport) {
+              // Perform initial import
+              logger.info("Starting initial export!");
+              try (MongoClient exportClient = new MongoClient(new MongoClientURI(params.getConnectionString()))) {
+                  MongoCollection<Document> collection = exportClient.getDatabase(params.database.iterator().next())
+                      .getCollection(params.collections.stream().findFirst().get());
+                  InitialExporter exporter = new InitialExporter(params.oplogSink, Collections.singleton(collection));
+                  exporter.doExport();
+              } catch (Exception e) {
+                  logger.log(Level.SEVERE, "Exception during initial export!", e);
+                   System.exit(1);
+              }
 
-      // Tail the oplog
-      while (params.globals.running.isRunning()) {
-        logger.info("Starting oplog tail.");
-        try {
-          logger.info("Creating a new oplog cursor.");
-          process(getNewCursor());
-        } catch (Exception e) {
-          logger.log(Level.SEVERE, "Error while processing oplog cursor.", e);
-        }
+              logger.info("Initial import complete!");
+          }
+
+          // Tail the oplog
+          while (params.globals.running.isRunning()) {
+              logger.info("Starting oplog tail.");
+              try {
+                  process(getNewCursor());
+              } catch (Exception e) {
+                  logger.log(Level.SEVERE, "Error while processing oplog cursor.", e);
+              }
 
         try {
           if (params.globals.running.isRunning()) {
@@ -164,63 +159,61 @@ public class MongoFollower implements Runnable {
    *     the cursor to process.
    */
   private void process(MongoCursor<Document> cursor) throws Exception {
-    while (params.globals.running.isRunning()) {
-      while (cursor.hasNext() && params.globals.running.isRunning()) {
-        Document d = cursor.next();
-        boolean put = false;
+      while (params.globals.running.isRunning()) {
+          while (cursor.hasNext() && params.globals.running.isRunning()) {
+              Document d = cursor.next();
+              boolean put = false;
 
-        // If a document is taken, keep trying to add it to the oplogSink.
-        while (!put && params.globals.running.isRunning()) {
-         OplogEntry entry = OplogEntry.of(d);
-      	  if (entry == null ) {
-    	    logger.warning("Unable deserialize oplog entry; skipping");
-      	    break;
-      	  }
-        	
-          // TODO: make the check more natural
-          if (shouldSkip(entry)) {
-            logger.info("Skipping oplog entry type " + entry.getClass().getSimpleName());
-            logger.finest("Skipped oplog entry document: " + entry.getRawEntry().toJson());
-            break;
+              // If a document is taken, keep trying to add it to the oplogSink.
+              while (!put && params.globals.running.isRunning()) {
+                  OplogEntry entry = OplogEntry.of(d);
+                  if (entry == null ) {
+                      logger.warning("Unable deserialize oplog entry; skipping");
+                      break;
+                  }
+
+                  if (shouldSkip(entry)) {
+                      logger.info("Skipping oplog entry type " + entry.getClass().getSimpleName());
+                      logger.finest("Skipped oplog entry document: " + entry.getRawEntry().toJson());
+                      break;
+                  }
+
+                  if (!params.oplogSink.send(new Record(entry))) {
+                      logger.warning("Unable to send data to output oplogSink.");
+                  }
+              }
           }
-        	
-          if (!params.oplogSink.send(new Record(entry))) {
-            logger.warning("Unable to send data to output oplogSink.");
-          }
-        }
+
+          // We need to wait for more data, the cursor has been exhausted.
+          Thread.sleep(1000L);
+      }
+  }
+
+  private boolean shouldSkip(OplogEntry entry) {
+      if (entry.shouldSkip()) {
+          logger.finest("Oplog entry skipped: " + entry.getClass().getSimpleName());
+          return true;
       }
 
-      // We need to wait for more data, the cursor has been exhausted.
-      Thread.sleep(1000L);
-    }
-  }
-  
-  private boolean shouldSkip(OplogEntry entry) {
-	  if (entry.shouldSkip()) {
-		  logger.finest("Oplog entry skipped: " + entry.getClass().getSimpleName());
-		  return true;
-	  }
-	  
-	  String ns = entry.getNamespace();
-	  if (!StringUtils.hasText(ns)) {
-		  logger.finest("Oplog entry has no namespace; skipping");
-		  return true;
-	  }
-	  
-	  // There may be multiple '.' characters, but mongo doesn't allow database names to contain one.
-	  int dotIdx = ns.indexOf('.');
-	  if (dotIdx == -1) {
-		  logger.warning("Skipping oplog entry with unrecognized namespace " + ns);
-		  return true;
-	  }
-	  
-	  String dbName = ns.substring(0, dotIdx);
-	  if (!params.database.contains(dbName)) {
-		  logger.warning("Skipping oplog entry with unprocessed database name " + dbName);
-		  return true;
-	  }
-	  
-	  return false;
-  }
-}
+      String ns = entry.getNamespace();
+      if (!StringUtils.hasText(ns)) {
+          logger.finest("Oplog entry has no namespace; skipping");
+          return true;
+      }
 
+      // There may be multiple '.' characters, but mongo doesn't allow database names to contain one.
+      int dotIdx = ns.indexOf('.');
+      if (dotIdx == -1) {
+          logger.warning("Skipping oplog entry with unrecognized namespace " + ns);
+          return true;
+      }
+
+      String dbName = ns.substring(0, dotIdx);
+      if (!params.database.contains(dbName)) {
+          logger.warning("Skipping oplog entry with unprocessed database name " + dbName);
+          return true;
+      }
+
+      return false;
+    }
+}

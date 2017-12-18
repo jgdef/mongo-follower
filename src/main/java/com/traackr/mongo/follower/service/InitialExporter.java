@@ -72,7 +72,7 @@ public class InitialExporter {
       } else {
         // Failed to put document into the oplogSink, don't clear 'cur' so another attempt is made.
         logger.warning("Failed to put next record in the oplogSink.");
-      }      
+      }
     }
   }
 

@@ -32,7 +32,7 @@ import org.bson.Document;
  *         Created on: 12/14/16
  */
 public class Record implements Serializable {
-	private static final long serialVersionUID = 6317446949572990670L;
+    private static final long serialVersionUID = 6317446949572990670L;
     public final OplogEntry oplogEntry;
     public final Document exportDocument;
 
@@ -41,7 +41,7 @@ public class Record implements Serializable {
         exportDocument = null;
     }
 
-      public Record(Document doc) {
+    public Record(Document doc) {
         oplogEntry = null;
         exportDocument = doc;
     }
