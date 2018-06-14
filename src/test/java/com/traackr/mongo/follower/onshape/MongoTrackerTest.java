@@ -26,7 +26,7 @@ import com.traackr.mongo.follower.service.Runner;
 
 public class MongoTrackerTest implements MongoEventListener {
   private static final Logger logger = Logger.getLogger(MongoTrackerTest.class.getName());
-  private static boolean cassandraSinkUnitTest = false;
+  private static boolean cassandraSinkUnitTest = true;
 
   /*
   static {
@@ -143,12 +143,16 @@ public class MongoTrackerTest implements MongoEventListener {
       try {
           @SuppressWarnings("unchecked")
           Class<? extends CassandraSink> c = (Class<? extends CassandraSink>) Class.forName("com.traackr.mongo.follower.service.CassandraSink");
-          org.bson.Document doc = org.bson.Document.parse("{\"op\":\"i\", \"v\":2, \"ts\":{\"$timestamp\": {\"t\":1505398435,\"i\":1}}, \"ns\":\"coredb.btuser\", \"o\":{\"a\":1, \"b\":2}}");
+            org.bson.Document doc = org.bson.Document.parse(
+                    "{\"ts\":Timestamp(1517852579, 1), \"t\" : NumberLong(88), \"h\" : NumberLong(\"2661287424918577090\"), \"v\" : 2, \"op\" : \"i\", \"ns\" : \"coredb.btuser\", \"o\" : { \"_id\" : ObjectId(\"5a7897a3663903de48845277\"), \"s\" : 1, \"ll\" : ISODate(\"2017-02-02T23:08:44.539Z\"), \"em\" : \"jgdef+trackertest@mit.edu\", \"fn\" : \"John (test)\", \"ln\" : \"de Freitas (test)\", \"pr\" : false, \"su\" : true, \"n\" : \"jgdef (test)\" } }");
+          //org.bson.Document doc = org.bson.Document.parse("{\"op\":\"i\", \"v\":2, \"ts\":{\"$timestamp\": {\"t\":1505398435,\"i\":1}}, \"ns\":\"coredb.btuser\", \"o\":{\"a\":1, \"b\":2}}");
           com.traackr.mongo.follower.model.OplogEntry entry = com.traackr.mongo.follower.model.OplogEntry.of(doc);
           java.lang.reflect.Method m = c.getMethod("process", com.traackr.mongo.follower.model.OplogEntry.class);
           m.invoke(null, entry);
           System.exit(0);
       } catch (Throwable t) {
+          logger.severe("Caught top-level throwable");
+          t.printStackTrace(System.err);
           System.exit(-1);
       }
   }
